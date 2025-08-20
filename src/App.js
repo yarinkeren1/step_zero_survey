@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
   const [showChallengeIntro, setShowChallengeIntro] = useState(false);
@@ -61,10 +64,11 @@ function App() {
       const timer = setTimeout(() => {
         setShowChallengeIntro(false);
         setCurrentQuestion(1);
+        navigate('/survey/question/1');
       }, 2250);
       return () => clearTimeout(timer);
     }
-  }, [showChallengeIntro]);
+  }, [showChallengeIntro, navigate]);
 
 
 
@@ -72,12 +76,14 @@ function App() {
     setShowSurvey(true);
     setCurrentQuestion(0); // Reset to ensure clean state
     setShowChallengeIntro(true);
+    navigate('/survey/intro');
   };
 
   const showNotInterested = () => {
     setShowSurvey(true);
     setShowThankYou(true);
     setThankYouType('not-interested');
+    navigate('/thank-you/not-interested');
   };
 
   const goBackToMain = () => {
@@ -96,6 +102,7 @@ function App() {
     setSelectedFile(null);
     setShowCheckmark(false);
     setErrors({});
+    navigate('/');
   };
 
   const goBack = () => {
@@ -217,28 +224,39 @@ function App() {
       
       if (questionNumber === 1) {
         setCurrentQuestion(2);
+        navigate('/survey/question/2');
       } else if (questionNumber === 2) {
         setCurrentQuestion(3);
+        navigate('/survey/question/3');
       } else if (questionNumber === 3) {
         if (challengeCompleted === 'Yes') {
           setCurrentQuestion('4a');
+          navigate('/survey/question/4a');
         } else {
           setCurrentQuestion('4b');
+          navigate('/survey/question/4b');
         }
       } else if (questionId === '4a') {
         setCurrentQuestion('5a');
+        navigate('/survey/question/5a');
       } else if (questionId === '4b') {
         setCurrentQuestion('5b');
+        navigate('/survey/question/5b');
       } else if (questionId === '4b-other') {
         setCurrentQuestion('5b');
+        navigate('/survey/question/5b');
       } else if (questionId === '5a') {
         setCurrentQuestion(6);
+        navigate('/survey/question/6');
       } else if (questionId === '5b') {
         setCurrentQuestion(6);
+        navigate('/survey/question/6');
       } else if (questionNumber === 6) {
         setCurrentQuestion(7);
+        navigate('/survey/question/7');
       } else if (questionNumber === 7) {
         setCurrentQuestion(8);
+        navigate('/survey/question/8');
       } else if (questionNumber === 8) {
         completeSurvey();
       }
@@ -293,7 +311,9 @@ function App() {
     const timer = setTimeout(() => {
       try {
         setShowThankYou(true);
-        setThankYouType(challengeCompleted === 'Yes' ? 'completed' : 'not-completed');
+        const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+        setThankYouType(type);
+        navigate(`/thank-you/${type}`);
       } catch (error) {
         console.error('Error in completeSurvey:', error);
       }
@@ -1339,6 +1359,14 @@ function App() {
         </>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
