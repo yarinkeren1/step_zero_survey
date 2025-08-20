@@ -36,7 +36,6 @@ A React-based survey application for Step Zero company.
 ## Available Scripts
 
 - `npm start` - Runs the app in development mode
-- `npm test` - Launches the test runner
 - `npm run build` - Builds the app for production
 - `npm run eject` - Ejects from Create React App (one-way operation)
 
