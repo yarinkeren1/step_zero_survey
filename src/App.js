@@ -379,9 +379,9 @@ function App() {
           )}
           {thankYouType === 'completed' && (
             <>
-              <h2>Thank You for Participating</h2>
+              <h2>Submitted</h2>
               <p>Congratulations on Taking Step Zero</p>
-              <p className="subheading">Keep up with our social media for more updates</p>
+              <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
               </button>
@@ -406,9 +406,9 @@ function App() {
           )}
           {thankYouType === 'not-completed' && (
             <>
-              <h2>Thank You</h2>
+              <h2>Submitted</h2>
               <p>Thanks for checking us out. Maybe next time.</p>
-              <p className="subheading">Keep up with our socials if you change your mind</p>
+              <p className="subheading">Keep up with our socials in case you change your mind and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
               </button>
