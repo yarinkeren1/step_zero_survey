@@ -465,6 +465,9 @@ function AppContent() {
               <button className="not-interested-btn" onClick={() => { setPreviousPage('not-interested'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
                 About Step Zero
               </button>
+              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
+                Take Survey Again (Reset)
+              </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
@@ -521,6 +524,9 @@ function AppContent() {
               <p className="subheading">Keep up with our socials in case you change your mind and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
+              </button>
+              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
+                Take Survey Again (Reset)
               </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
