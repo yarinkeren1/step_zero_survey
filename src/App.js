@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import './App.css';
 
@@ -6,6 +6,7 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
+  const timerRef = useRef(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
   const [showChallengeIntro, setShowChallengeIntro] = useState(false);
@@ -171,15 +172,31 @@ function AppContent() {
 
 
   useEffect(() => {
-    if (showChallengeIntro && currentQuestion === 0) {
-      const timer = setTimeout(() => {
+    if (showChallengeIntro && currentQuestion === 0 && !timerRef.current) {
+      timerRef.current = setTimeout(() => {
         setShowChallengeIntro(false);
         setCurrentQuestion(1);
         navigate('/survey/question/1');
+        timerRef.current = null;
       }, 2250);
-      return () => clearTimeout(timer);
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      };
     }
   }, [showChallengeIntro, currentQuestion, navigate]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
 
 
 
@@ -190,6 +207,12 @@ function AppContent() {
       setThankYouType(lastThankYouType || 'completed');
       navigate(`/thank-you/${lastThankYouType || 'completed'}`);
       return;
+    }
+    
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
     
     setShowSurvey(true);
