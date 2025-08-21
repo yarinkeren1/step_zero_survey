@@ -28,6 +28,7 @@ function AppContent() {
   const [showCookieBanner, setShowCookieBanner] = useState(true);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [surveyCompleted, setSurveyCompleted] = useState(false);
+  const [lastThankYouType, setLastThankYouType] = useState('');
 
   const totalQuestions = 9;
 
@@ -54,6 +55,7 @@ function AppContent() {
   useEffect(() => {
     const savedCookieConsent = localStorage.getItem('cookiesAccepted');
     const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
+    const savedLastThankYouType = localStorage.getItem('lastThankYouType');
     
     if (savedCookieConsent) {
       setCookiesAccepted(savedCookieConsent === 'true' ? true : savedCookieConsent === 'necessary' ? 'necessary' : false);
@@ -62,6 +64,10 @@ function AppContent() {
     
     if (savedSurveyCompleted === 'true') {
       setSurveyCompleted(true);
+    }
+    
+    if (savedLastThankYouType) {
+      setLastThankYouType(savedLastThankYouType);
     }
   }, []);
 
@@ -82,10 +88,10 @@ function AppContent() {
 
   const startSurvey = () => {
     if (surveyCompleted) {
-      // If survey is already completed, show thank you page
+      // If survey is already completed, show the appropriate thank you page
       setShowThankYou(true);
-      setThankYouType('completed');
-      navigate('/thank-you/completed');
+      setThankYouType(lastThankYouType || 'completed');
+      navigate(`/thank-you/${lastThankYouType || 'completed'}`);
       return;
     }
     
@@ -96,9 +102,21 @@ function AppContent() {
   };
 
   const showNotInterested = () => {
+    if (surveyCompleted) {
+      // If survey is already completed, show the appropriate thank you page
+      setShowThankYou(true);
+      setThankYouType(lastThankYouType || 'not-interested');
+      navigate(`/thank-you/${lastThankYouType || 'not-interested'}`);
+      return;
+    }
+    
     setShowSurvey(true);
     setShowThankYou(true);
     setThankYouType('not-interested');
+    setLastThankYouType('not-interested');
+    setSurveyCompleted(true);
+    localStorage.setItem('surveyCompleted', 'true');
+    localStorage.setItem('lastThankYouType', 'not-interested');
     navigate('/thank-you/not-interested');
   };
 
@@ -124,7 +142,9 @@ function AppContent() {
 
   const resetSurvey = () => {
     setSurveyCompleted(false);
+    setLastThankYouType('');
     localStorage.removeItem('surveyCompleted');
+    localStorage.removeItem('lastThankYouType');
     setShowSurvey(false);
     setShowThankYou(false);
     setShowAbout(false);
@@ -376,8 +396,10 @@ function AppContent() {
         setShowThankYou(true);
         const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
         setThankYouType(type);
+        setLastThankYouType(type);
         setSurveyCompleted(true);
         localStorage.setItem('surveyCompleted', 'true');
+        localStorage.setItem('lastThankYouType', type);
         navigate(`/thank-you/${type}`);
       } catch (error) {
         console.error('Error in completeSurvey:', error);
