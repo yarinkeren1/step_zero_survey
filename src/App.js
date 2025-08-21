@@ -165,6 +165,8 @@ function AppContent() {
         setShowThankYou(false);
         setShowAbout(false);
         setShowPrivacy(false);
+        // Preserve survey state when navigating between questions
+        // Don't reset answers, errors, challengeCompleted, or other survey state
       }
     }
   }, [location.pathname]);
