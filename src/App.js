@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import './App.css';
 
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
   const [showChallengeIntro, setShowChallengeIntro] = useState(false);
@@ -71,71 +72,100 @@ function AppContent() {
     }
   }, []);
 
-  // Handle browser back/forward navigation
+  // Handle browser back/forward navigation and route changes
   useEffect(() => {
-    const handlePopState = (event) => {
-      const path = location.pathname;
-      
-      if (path === '/') {
-        // Home page
-        setShowSurvey(false);
+    const path = location.pathname;
+    
+    if (path === '/') {
+      // Home page
+      setShowSurvey(false);
+      setShowThankYou(false);
+      setShowAbout(false);
+      setShowPrivacy(false);
+      setThankYouType('');
+      setCurrentQuestion(0);
+      setShowChallengeIntro(false);
+      setChallengeCompleted(null);
+      setAnswers({});
+      setShowOtherSection(false);
+      setShowOtherSection5a(false);
+      setShowEmailSection(false);
+      setShowMediaSection(false);
+      setSelectedFile(null);
+      setShowCheckmark(false);
+      setErrors({});
+    } else if (path.startsWith('/thank-you/')) {
+      // Thank you page
+      const thankYouTypeFromPath = path.split('/')[2];
+      setShowThankYou(true);
+      setThankYouType(thankYouTypeFromPath);
+      setShowSurvey(false);
+      setShowAbout(false);
+      setShowPrivacy(false);
+      setCurrentQuestion(0);
+      setShowChallengeIntro(false);
+      setChallengeCompleted(null);
+      setAnswers({});
+      setShowOtherSection(false);
+      setShowOtherSection5a(false);
+      setShowEmailSection(false);
+      setShowMediaSection(false);
+      setSelectedFile(null);
+      setShowCheckmark(false);
+      setErrors({});
+    } else if (path === '/about') {
+      // About page
+      setShowAbout(true);
+      setShowSurvey(false);
+      setShowThankYou(false);
+      setShowPrivacy(false);
+      setCurrentQuestion(0);
+      setShowChallengeIntro(false);
+      setChallengeCompleted(null);
+      setAnswers({});
+      setShowOtherSection(false);
+      setShowOtherSection5a(false);
+      setShowEmailSection(false);
+      setShowMediaSection(false);
+      setSelectedFile(null);
+      setShowCheckmark(false);
+      setErrors({});
+    } else if (path === '/privacy') {
+      // Privacy page
+      setShowPrivacy(true);
+      setShowSurvey(false);
+      setShowThankYou(false);
+      setShowAbout(false);
+      setCurrentQuestion(0);
+      setShowChallengeIntro(false);
+      setChallengeCompleted(null);
+      setAnswers({});
+      setShowOtherSection(false);
+      setShowOtherSection5a(false);
+      setShowEmailSection(false);
+      setShowMediaSection(false);
+      setSelectedFile(null);
+      setShowCheckmark(false);
+      setErrors({});
+    } else if (path.startsWith('/survey/')) {
+      // Survey pages
+      if (path === '/survey/intro') {
+        setShowSurvey(true);
+        setCurrentQuestion(0);
+        setShowChallengeIntro(true);
         setShowThankYou(false);
         setShowAbout(false);
         setShowPrivacy(false);
-        setThankYouType('');
-        setCurrentQuestion(0);
+      } else if (path.startsWith('/survey/question/')) {
+        const questionNum = path.split('/')[3];
+        setShowSurvey(true);
+        setCurrentQuestion(questionNum);
         setShowChallengeIntro(false);
-        setChallengeCompleted(null);
-        setAnswers({});
-        setShowOtherSection(false);
-        setShowOtherSection5a(false);
-        setShowEmailSection(false);
-        setShowMediaSection(false);
-        setSelectedFile(null);
-        setShowCheckmark(false);
-        setErrors({});
-      } else if (path.startsWith('/thank-you/')) {
-        // Thank you page
-        const thankYouTypeFromPath = path.split('/')[2];
-        setShowThankYou(true);
-        setThankYouType(thankYouTypeFromPath);
-        setShowSurvey(false);
+        setShowThankYou(false);
         setShowAbout(false);
         setShowPrivacy(false);
-        setCurrentQuestion(0);
-        setShowChallengeIntro(false);
-        setChallengeCompleted(null);
-        setAnswers({});
-        setShowOtherSection(false);
-        setShowOtherSection5a(false);
-        setShowEmailSection(false);
-        setShowMediaSection(false);
-        setSelectedFile(null);
-        setShowCheckmark(false);
-        setErrors({});
-      } else if (path.startsWith('/survey/')) {
-        // Survey pages
-        if (path === '/survey/intro') {
-          setShowSurvey(true);
-          setCurrentQuestion(0);
-          setShowChallengeIntro(true);
-          setShowThankYou(false);
-          setShowAbout(false);
-          setShowPrivacy(false);
-        } else if (path.startsWith('/survey/question/')) {
-          const questionNum = path.split('/')[3];
-          setShowSurvey(true);
-          setCurrentQuestion(questionNum);
-          setShowChallengeIntro(false);
-          setShowThankYou(false);
-          setShowAbout(false);
-          setShowPrivacy(false);
-        }
       }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    }
   }, [location.pathname]);
 
 
@@ -529,7 +559,7 @@ function AppContent() {
         <div className="nav-bar">
           <div className="nav-links">
             <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowAbout(true); }}>About</button>
+            <button className="nav-btn" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowAbout(true); navigate('/about'); }}>About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
           </div>
         </div>
@@ -635,7 +665,7 @@ function AppContent() {
               <span>© Step Zero, Inc 2025</span>
             </div>
             <div className="privacy-footer">
-              <button className="privacy-link" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowPrivacy(true); }}>
+              <button className="privacy-link" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowPrivacy(true); navigate('/privacy'); }}>
                 Privacy and Terms
               </button>
             </div>
@@ -651,7 +681,7 @@ function AppContent() {
         <div className="nav-bar">
           <div className="nav-links">
             <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage('privacy'); setShowPrivacy(false); setShowAbout(true); }}>About</button>
+            <button className="nav-btn" onClick={() => { setPreviousPage('privacy'); setShowPrivacy(false); setShowAbout(true); navigate('/about'); }}>About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
           </div>
         </div>
@@ -952,18 +982,22 @@ function AppContent() {
           <button className="continue-btn" style={{ transform: 'scale(0.75)' }} onClick={() => {
             setShowAbout(false);
             if (previousPage === 'hero') {
-              // Return to hero page (do nothing, just hide about)
+              // Return to hero page
+              navigate('/');
             } else if (previousPage === 'privacy') {
               setShowPrivacy(true);
             } else if (previousPage === 'not-interested') {
               setShowThankYou(true);
               setThankYouType('not-interested');
+              navigate('/thank-you/not-interested');
             } else if (previousPage === 'completed') {
               setShowThankYou(true);
               setThankYouType('completed');
+              navigate('/thank-you/completed');
             } else if (previousPage === 'not-completed') {
               setShowThankYou(true);
               setThankYouType('not-completed');
+              navigate('/thank-you/not-completed');
             }
           }}>
             Back
@@ -991,7 +1025,7 @@ function AppContent() {
               </a>
             </div>
             <div className="privacy-footer">
-              <button className="privacy-link" onClick={() => { setPreviousPage('about'); setShowAbout(false); setShowPrivacy(true); }}>
+              <button className="privacy-link" onClick={() => { setPreviousPage('about'); setShowAbout(false); setShowPrivacy(true); navigate('/privacy'); }}>
                 Privacy and Terms
               </button>
             </div>
@@ -1071,7 +1105,7 @@ function AppContent() {
                 </div>
                 <button 
                   className="cookie-popup-link"
-                  onClick={() => { setShowCookieBanner(false); setShowPrivacy(true); setActiveTab('cookies'); }}
+                  onClick={() => { setShowCookieBanner(false); setShowPrivacy(true); setActiveTab('cookies'); navigate('/privacy'); }}
                 >
                   Learn more
                 </button>
@@ -1638,7 +1672,14 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<AppContent />} />
+        <Route path="/about" element={<AppContent />} />
+        <Route path="/privacy" element={<AppContent />} />
+        <Route path="/thank-you/:type" element={<AppContent />} />
+        <Route path="/survey/intro" element={<AppContent />} />
+        <Route path="/survey/question/:questionNum" element={<AppContent />} />
+      </Routes>
     </Router>
   );
 }
