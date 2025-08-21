@@ -148,27 +148,16 @@ function AppContent() {
       setSelectedFile(null);
       setShowCheckmark(false);
       setErrors({});
-    } else if (path.startsWith('/survey/')) {
-      // Survey pages
-      if (path === '/survey/intro') {
-        setShowSurvey(true);
-        setCurrentQuestion(0);
-        setShowChallengeIntro(true);
-        setShowThankYou(false);
-        setShowAbout(false);
-        setShowPrivacy(false);
-      } else if (path.startsWith('/survey/question/')) {
-        const questionNum = path.split('/')[3];
-        setShowSurvey(true);
-        setCurrentQuestion(parseInt(questionNum) || questionNum);
-        setShowChallengeIntro(false);
-        setShowThankYou(false);
-        setShowAbout(false);
-        setShowPrivacy(false);
-        // Preserve survey state when navigating between questions
-        // Don't reset answers, errors, challengeCompleted, or other survey state
-      }
+    } else if (path === '/survey/intro') {
+      // Survey intro only - don't interfere with survey questions
+      setShowSurvey(true);
+      setCurrentQuestion(0);
+      setShowChallengeIntro(true);
+      setShowThankYou(false);
+      setShowAbout(false);
+      setShowPrivacy(false);
     }
+    // Note: We don't handle /survey/question/* routes here to avoid interfering with survey flow
   }, [location.pathname]);
 
 
