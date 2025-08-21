@@ -199,10 +199,13 @@ function AppContent() {
     
     if (surveyCompleted && surveyCompletionTime && (currentTime - parseInt(surveyCompletionTime)) < oneMinute) {
       // If survey was completed less than 1 minute ago, show the appropriate thank you page
-      setShowThankYou(true);
-      setThankYouType(lastThankYouType || 'completed');
-      navigate(`/thank-you/${lastThankYouType || 'completed'}`);
-      return;
+      // But only if it wasn't completed via "Not Interested" - in that case, start fresh
+      if (lastThankYouType && lastThankYouType !== 'not-interested') {
+        setShowThankYou(true);
+        setThankYouType(lastThankYouType);
+        navigate(`/thank-you/${lastThankYouType}`);
+        return;
+      }
     }
     
     // Clear any existing timer
@@ -218,14 +221,7 @@ function AppContent() {
   };
 
   const showNotInterested = () => {
-    if (surveyCompleted) {
-      // If survey is already completed, show the appropriate thank you page
-      setShowThankYou(true);
-      setThankYouType(lastThankYouType || 'not-interested');
-      navigate(`/thank-you/${lastThankYouType || 'not-interested'}`);
-      return;
-    }
-    
+    // Always show the "not-interested" thank you page, regardless of previous survey state
     setShowSurvey(false);
     setShowThankYou(true);
     setThankYouType('not-interested');
@@ -934,7 +930,7 @@ function AppContent() {
         <div className="nav-bar">
           <div className="nav-links">
             <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>About</button>
+            <button className="nav-btn">About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
           </div>
         </div>

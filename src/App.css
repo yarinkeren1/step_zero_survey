@@ -44,12 +44,17 @@ body {
   top: 20px;
   left: 20px;
   z-index: 1000;
+  padding: 15px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .nav-links {
   display: flex;
   gap: 30px;
 }
+
+
 
 .nav-btn {
   background: transparent;
