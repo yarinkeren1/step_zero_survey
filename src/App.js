@@ -226,7 +226,7 @@ function AppContent() {
     } else if (questionNumber === 7) {
       const age = answers.age || '';
       const ageNum = parseInt(age);
-      isValid = age.trim().length > 0 && !isNaN(ageNum) && ageNum >= 1 && ageNum <= 99;
+      isValid = age.trim().length > 0 && !isNaN(ageNum) && ageNum >= 1 && ageNum <= 120;
       errorKey = 'age';
     } else if (questionNumber === 8) {
       const gender = answers.gender || '';
@@ -1295,13 +1295,13 @@ function AppContent() {
                     value={answers.age || ''}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Only allow numbers and limit to 2 digits
-                      if (value === '' || (/^\d{1,2}$/.test(value) && parseInt(value) >= 1 && parseInt(value) <= 99)) {
+                      // Only allow numbers and limit to 3 digits
+                      if (value === '' || (/^\d{1,3}$/.test(value) && parseInt(value) >= 1 && parseInt(value) <= 120)) {
                         handleInputChange('age', value);
                       }
                     }}
                     min="1"
-                    max="99"
+                    max="120"
                     key={`age-${shakeTrigger}`}
                   />
 
@@ -1314,7 +1314,7 @@ function AppContent() {
                     Continue
                   </button>
                 </div>
-                {errors.age && <div className="error-message">Please provide a valid age (1-99)</div>}
+                {errors.age && <div className="error-message">Please provide a valid age</div>}
               </div>
             </div>
           )}
