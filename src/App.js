@@ -394,8 +394,16 @@ function AppContent() {
       if (answers.question5b === 'Yes') {
         const answer = answers['answer5b-email'] || '';
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*$/;
-        isValid = answer.trim().length > 0 && emailRegex.test(answer);
-        errorKey = 'answer5b-email';
+        
+        if (answer.trim().length === 0) {
+          isValid = false;
+          errorKey = 'answer5b-email-empty';
+        } else if (!emailRegex.test(answer)) {
+          isValid = false;
+          errorKey = 'answer5b-email-invalid';
+        } else {
+          isValid = true;
+        }
       } else {
         isValid = answers.question5b !== undefined;
       }
@@ -418,7 +426,16 @@ function AppContent() {
     }
 
     if (isValid) {
-      setErrors({ ...errors, [errorKey]: false });
+      // Clear email-specific errors when validation passes
+      if (questionId === '5b') {
+        setErrors({ 
+          ...errors, 
+          'answer5b-email-empty': false,
+          'answer5b-email-invalid': false 
+        });
+      } else {
+        setErrors({ ...errors, [errorKey]: false });
+      }
       
       if (questionNumber === 1) {
         setCurrentQuestion(2);
@@ -563,6 +580,14 @@ function AppContent() {
     setAnswers({ ...answers, [questionId]: value });
     if (errors[questionId]) {
       setErrors({ ...errors, [questionId]: false });
+    }
+    // Clear email-specific errors when user types
+    if (questionId === 'answer5b-email') {
+      setErrors({ 
+        ...errors, 
+        'answer5b-email-empty': false,
+        'answer5b-email-invalid': false 
+      });
     }
   };
 
@@ -1502,7 +1527,8 @@ function AppContent() {
                       onChange={(e) => handleInputChange('answer5b-email', e.target.value)}
                       key={`answer5b-email-${shakeTrigger}`}
                     />
-                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address</div>}
+                    {errors['answer5b-email-empty'] && <div className="error-message">Please provide an email address</div>}
+                    {errors['answer5b-email-invalid'] && <div className="error-message">Please provide a valid email address</div>}
                   </div>
                 </div>
               )}
