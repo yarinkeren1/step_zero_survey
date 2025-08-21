@@ -71,6 +71,73 @@ function AppContent() {
     }
   }, []);
 
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const path = location.pathname;
+      
+      if (path === '/') {
+        // Home page
+        setShowSurvey(false);
+        setShowThankYou(false);
+        setShowAbout(false);
+        setShowPrivacy(false);
+        setThankYouType('');
+        setCurrentQuestion(0);
+        setShowChallengeIntro(false);
+        setChallengeCompleted(null);
+        setAnswers({});
+        setShowOtherSection(false);
+        setShowOtherSection5a(false);
+        setShowEmailSection(false);
+        setShowMediaSection(false);
+        setSelectedFile(null);
+        setShowCheckmark(false);
+        setErrors({});
+      } else if (path.startsWith('/thank-you/')) {
+        // Thank you page
+        const thankYouTypeFromPath = path.split('/')[2];
+        setShowThankYou(true);
+        setThankYouType(thankYouTypeFromPath);
+        setShowSurvey(false);
+        setShowAbout(false);
+        setShowPrivacy(false);
+        setCurrentQuestion(0);
+        setShowChallengeIntro(false);
+        setChallengeCompleted(null);
+        setAnswers({});
+        setShowOtherSection(false);
+        setShowOtherSection5a(false);
+        setShowEmailSection(false);
+        setShowMediaSection(false);
+        setSelectedFile(null);
+        setShowCheckmark(false);
+        setErrors({});
+      } else if (path.startsWith('/survey/')) {
+        // Survey pages
+        if (path === '/survey/intro') {
+          setShowSurvey(true);
+          setCurrentQuestion(0);
+          setShowChallengeIntro(true);
+          setShowThankYou(false);
+          setShowAbout(false);
+          setShowPrivacy(false);
+        } else if (path.startsWith('/survey/question/')) {
+          const questionNum = path.split('/')[3];
+          setShowSurvey(true);
+          setCurrentQuestion(questionNum);
+          setShowChallengeIntro(false);
+          setShowThankYou(false);
+          setShowAbout(false);
+          setShowPrivacy(false);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.pathname]);
+
 
 
   useEffect(() => {
@@ -169,41 +236,56 @@ function AppContent() {
       setShowSurvey(false);
       setShowChallengeIntro(false);
       setCurrentQuestion(0);
+      navigate('/');
     } else if (currentQuestion === 2) {
       setCurrentQuestion(1);
+      navigate('/survey/question/1');
     } else if (currentQuestion === 3) {
       setCurrentQuestion(2);
+      navigate('/survey/question/2');
     } else if (currentQuestion === '4a') {
       setCurrentQuestion(3);
+      navigate('/survey/question/3');
     } else if (currentQuestion === '4b') {
       setCurrentQuestion(3);
+      navigate('/survey/question/3');
     } else if (currentQuestion === '4b-other') {
       setShowOtherSection(false);
       setCurrentQuestion('4b');
+      navigate('/survey/question/4b');
     } else if (currentQuestion === '5a') {
       setCurrentQuestion('4a');
+      navigate('/survey/question/4a');
     } else if (currentQuestion === '5c') {
       setCurrentQuestion('5a');
+      navigate('/survey/question/5a');
     } else if (currentQuestion === '5b') {
       if (showEmailSection) {
         setShowEmailSection(false);
         setCurrentQuestion('5b');
+        navigate('/survey/question/5b');
       } else {
         setCurrentQuestion('4b');
+        navigate('/survey/question/4b');
       }
     } else if (currentQuestion === '5b-email') {
       setShowEmailSection(false);
       setCurrentQuestion('5b');
+      navigate('/survey/question/5b');
     } else if (currentQuestion === 6) {
       if (challengeCompleted === 'Yes') {
         setCurrentQuestion('5c');
+        navigate('/survey/question/5c');
       } else {
         setCurrentQuestion('5b');
+        navigate('/survey/question/5b');
       }
     } else if (currentQuestion === 7) {
       setCurrentQuestion(6);
+      navigate('/survey/question/6');
     } else if (currentQuestion === 8) {
       setCurrentQuestion(7);
+      navigate('/survey/question/7');
     }
   };
 
@@ -447,7 +529,7 @@ function AppContent() {
         <div className="nav-bar">
           <div className="nav-links">
             <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage('hero'); setShowAbout(true); }}>About</button>
+            <button className="nav-btn" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowAbout(true); }}>About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
           </div>
         </div>
@@ -607,7 +689,7 @@ function AppContent() {
             <h3>1. Information We Collect</h3>
             <p>When you engage with Step Zero, we may collect:</p>
             <ul>
-              <li><strong>Contact Information:</strong> such as your email address or social media handle (if you choose to provide it).</li>
+                              <li><strong>Contact Information:</strong> such as your email address (if you choose to provide it).</li>
               <li><strong>Demographic Information:</strong> such as your age and gender (if you choose to provide it).</li>
               <li><strong>Survey Responses:</strong> written answers, reflections, and other personal responses about Step Zero challenges.</li>
               <li><strong>File Uploads:</strong> photos, videos, or documents you voluntarily submit.</li>
@@ -621,7 +703,7 @@ function AppContent() {
               <li>Record and analyze participation in Step Zero challenges.</li>
               <li>Improve the design and impact of Step Zero.</li>
               <li>Communicate with you if you opted in to receive more challenges.</li>
-              <li>Share content publicly only if you gave explicit consent.</li>
+                              <li>Share content publicly only if you gave explicit consent, while maintaining your anonymity.</li>
               <li>Maintain security and integrity of our website and services.</li>
             </ul>
             
@@ -634,10 +716,18 @@ function AppContent() {
               <li><strong>Legal Compliance:</strong> if required by law, legal process, or to protect rights and safety.</li>
             </ul>
             
-            <h3>4. Data Retention</h3>
-            <p>We retain information only as long as necessary to fulfill the purposes above. You may request deletion of your personal data at any time (see Section 8).</p>
+            <h3>4. Third-Party Services</h3>
+            <p>We use the following third-party services to operate our website and store your data:</p>
+            <ul>
+              <li><strong>Vercel:</strong> We use Vercel for web hosting and content delivery. Vercel may collect technical information such as IP addresses and browser data as part of their hosting services.</li>
+              <li><strong>Supabase:</strong> We use Supabase as our database and storage provider for securely storing your survey responses, file uploads, and other data you submit. Supabase processes and stores this data on our behalf.</li>
+            </ul>
+            <p>These services have their own privacy policies and data handling practices. We recommend reviewing their privacy policies to understand how they handle your data.</p>
             
-            <h3>5. Your Rights</h3>
+            <h3>5. Data Retention</h3>
+            <p>We retain information only as long as necessary to fulfill the purposes above. You may request deletion of your personal data at any time (see Section 9).</p>
+            
+            <h3>6. Your Rights</h3>
             <p>Depending on your location (e.g., California Consumer Privacy Act (CCPA) or EU/UK GDPR):</p>
             <ul>
               <li>You may request access to the data we hold about you.</li>
@@ -647,17 +737,17 @@ function AppContent() {
             </ul>
             <p>To exercise these rights, contact us at <a href="mailto:stepzeroglobal@gmail.com">stepzeroglobal@gmail.com</a></p>
             
-            <h3>6. Security</h3>
+            <h3>7. Security</h3>
             <p>We use reasonable measures to protect your information, but no system is 100% secure. Please only submit content you are comfortable sharing.</p>
             
-            <h3>7. Children's Privacy</h3>
+            <h3>8. Children's Privacy</h3>
             <p>Step Zero is not directed at children under 13. We do not knowingly collect personal data from children under 13 without parental consent.</p>
             
-            <h3>8. Contact Us</h3>
+            <h3>9. Contact Us</h3>
             <p>If you have questions or requests regarding this Privacy Policy, please contact us at:</p>
             <p>Email: <a href="mailto:stepzeroglobal@gmail.com">stepzeroglobal@gmail.com</a></p>
             
-            <h3>9. Updates</h3>
+            <h3>10. Updates</h3>
             <p>We may update this Privacy Policy from time to time. Changes will be posted with a revised "Effective Date."</p>
                 </div>
               )}
@@ -681,7 +771,7 @@ function AppContent() {
                   
                   <h3>2. Content Ownership and Licensing</h3>
                   <p><strong>Your Content:</strong> You retain ownership of the responses, reflections, photos, videos, or other media ("Content") you submit.</p>
-                  <p><strong>License You Grant Us:</strong> By submitting Content, you grant Step Zero a non-exclusive, worldwide, royalty-free license to use, reproduce, modify, and display your Content only for the purposes you consented to (for example: internal research, anonymized analysis, or sharing anonymized excerpts on social media).</p>
+                  <p><strong>License You Grant Us:</strong> By submitting Content, you grant Step Zero a non-exclusive, worldwide, royalty-free license to use and display your Content only for the purposes you consented to (for example: internal research, anonymized analysis, or sharing anonymized excerpts online).</p>
                   <p><strong>Anonymity:</strong> If you consent to public sharing, your Content will be shared anonymously. Personally identifiable data (such as name, email, social handle) will not be attached.</p>
                   
                   <h3>3. Limitation of Liability</h3>
@@ -692,7 +782,10 @@ function AppContent() {
                     <li>We provide the website and challenges "as is" without warranties of any kind, either express or implied.</li>
                   </ul>
                   
-                  <h3>4. Dispute Resolution</h3>
+                  <h3>4. Third-Party Providers</h3>
+                  <p>We may rely on third-party providers to operate the site. By using Step Zero, you acknowledge this reliance and understand that our service may be subject to the availability and performance of these third-party services.</p>
+                  
+                  <h3>5. Dispute Resolution</h3>
                   <ul>
                     <li>If you have a dispute with Step Zero, we encourage you to contact us first at stepzeroglobal@gmail.com to attempt to resolve it informally.</li>
                     <li>If unresolved, disputes will be handled through binding arbitration under the rules of the American Arbitration Association, unless otherwise required by law.</li>
@@ -700,13 +793,13 @@ function AppContent() {
                     <li>These Terms are governed by the laws of the State of Florida, without regard to conflict of law principles.</li>
                   </ul>
                   
-                  <h3>5. Termination</h3>
+                  <h3>6. Termination</h3>
                   <p>We may suspend or terminate your access to Step Zero at any time, without notice, if we reasonably believe you have violated these Terms or engaged in unlawful or harmful activity. You may also stop using Step Zero at any time.</p>
                   
-                  <h3>6. Changes to Terms</h3>
+                  <h3>7. Changes to Terms</h3>
                   <p>We may update these Terms from time to time. Changes will be posted with a new "Last Updated" date. Continued use of the site after changes means you accept the revised Terms.</p>
                   
-                  <h3>7. Contact Us</h3>
+                  <h3>8. Contact Us</h3>
                   <p>For questions about these Terms, please contact us at:</p>
                   <p>Email: <a href="mailto:stepzeroglobal@gmail.com">stepzeroglobal@gmail.com</a></p>
                 </div>
@@ -821,12 +914,12 @@ function AppContent() {
         <div className="nav-bar">
           <div className="nav-links">
             <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage('hero'); setShowAbout(true); }}>About</button>
+            <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
           </div>
         </div>
         <div className="about-page">
-          <h2>What We Are About</h2>
+                        <h2>About Us</h2>
           <div className="about-content">
             <p>
               Step Zero is a movement created to push people to become the best version of themselves 
@@ -1273,7 +1366,7 @@ function AppContent() {
 
           {currentQuestion === '5c' && (
             <div className="question">
-              <h3>Would you do another Step Zero challenge tomorrow?</h3>
+              <h3>Would you do another similar challenge tomorrow?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question5c ? 'shake' : ''}`} key={`question5c-${shakeTrigger}`}>
                   <div 
