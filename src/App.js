@@ -27,6 +27,7 @@ function AppContent() {
   const [termsConsent, setTermsConsent] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(true);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  const [surveyCompleted, setSurveyCompleted] = useState(false);
 
   const totalQuestions = 9;
 
@@ -49,12 +50,18 @@ function AppContent() {
     localStorage.setItem('cookiesAccepted', 'necessary');
   };
 
-  // Check for existing cookie consent on component mount
+  // Check for existing cookie consent and survey completion on component mount
   useEffect(() => {
     const savedCookieConsent = localStorage.getItem('cookiesAccepted');
+    const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
+    
     if (savedCookieConsent) {
       setCookiesAccepted(savedCookieConsent === 'true' ? true : savedCookieConsent === 'necessary' ? 'necessary' : false);
       setShowCookieBanner(false);
+    }
+    
+    if (savedSurveyCompleted === 'true') {
+      setSurveyCompleted(true);
     }
   }, []);
 
@@ -74,6 +81,14 @@ function AppContent() {
 
 
   const startSurvey = () => {
+    if (surveyCompleted) {
+      // If survey is already completed, show thank you page
+      setShowThankYou(true);
+      setThankYouType('completed');
+      navigate('/thank-you/completed');
+      return;
+    }
+    
     setShowSurvey(true);
     setCurrentQuestion(0); // Reset to ensure clean state
     setShowChallengeIntro(true);
@@ -88,6 +103,28 @@ function AppContent() {
   };
 
   const goBackToMain = () => {
+    setShowSurvey(false);
+    setShowThankYou(false);
+    setShowAbout(false);
+    setShowPrivacy(false);
+    setThankYouType('');
+    setCurrentQuestion(0);
+    setShowChallengeIntro(false);
+    setChallengeCompleted(null);
+    setAnswers({});
+    setShowOtherSection(false);
+    setShowOtherSection5a(false);
+    setShowEmailSection(false);
+    setShowMediaSection(false);
+    setSelectedFile(null);
+    setShowCheckmark(false);
+    setErrors({});
+    navigate('/');
+  };
+
+  const resetSurvey = () => {
+    setSurveyCompleted(false);
+    localStorage.removeItem('surveyCompleted');
     setShowSurvey(false);
     setShowThankYou(false);
     setShowAbout(false);
@@ -339,6 +376,8 @@ function AppContent() {
         setShowThankYou(true);
         const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
         setThankYouType(type);
+        setSurveyCompleted(true);
+        localStorage.setItem('surveyCompleted', 'true');
         navigate(`/thank-you/${type}`);
       } catch (error) {
         console.error('Error in completeSurvey:', error);
@@ -430,6 +469,9 @@ function AppContent() {
               <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
+              </button>
+              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
+                Take Survey Again (Reset)
               </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
