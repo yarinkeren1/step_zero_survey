@@ -212,7 +212,8 @@ function AppContent() {
     } else if (questionId === '5b') {
       if (answers.question5b === 'Yes') {
         const answer = answers['answer5b-email'] || '';
-        isValid = answer.trim().length > 0;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        isValid = answer.trim().length > 0 && emailRegex.test(answer);
         errorKey = 'answer5b-email';
       } else {
         isValid = answers.question5b !== undefined;
@@ -224,7 +225,8 @@ function AppContent() {
       errorKey = 'question6';
     } else if (questionNumber === 7) {
       const age = answers.age || '';
-      isValid = age.trim().length > 0;
+      const ageNum = parseInt(age);
+      isValid = age.trim().length > 0 && !isNaN(ageNum) && ageNum >= 1 && ageNum <= 99;
       errorKey = 'age';
     } else if (questionNumber === 8) {
       const gender = answers.gender || '';
@@ -1269,12 +1271,12 @@ function AppContent() {
                     <input
                       type="email"
                       className={`text-input ${errors['answer5b-email'] ? 'shake' : ''}`}
-                      placeholder="name@example.com"
+                      placeholder="name@domain.com"
                       value={answers['answer5b-email'] || ''}
                       onChange={(e) => handleInputChange('answer5b-email', e.target.value)}
                       key={`answer5b-email-${shakeTrigger}`}
                     />
-                    {errors['answer5b-email'] && <div className="error-message">Please provide a response</div>}
+                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address (e.g., name@domain.com)</div>}
                   </div>
                 </div>
               )}
@@ -1291,9 +1293,15 @@ function AppContent() {
                     className={`text-input ${errors.age ? 'shake' : ''}`}
                     placeholder="Enter your age"
                     value={answers.age || ''}
-                    onChange={(e) => handleInputChange('age', e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numbers and limit to 2 digits
+                      if (value === '' || (/^\d{1,2}$/.test(value) && parseInt(value) >= 1 && parseInt(value) <= 99)) {
+                        handleInputChange('age', value);
+                      }
+                    }}
                     min="1"
-                    max="120"
+                    max="99"
                     key={`age-${shakeTrigger}`}
                   />
 
@@ -1306,7 +1314,7 @@ function AppContent() {
                     Continue
                   </button>
                 </div>
-                {errors.age && <div className="error-message">Please provide a response</div>}
+                {errors.age && <div className="error-message">Please provide a valid age (1-99)</div>}
               </div>
             </div>
           )}
