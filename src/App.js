@@ -171,7 +171,7 @@ function AppContent() {
 
 
   useEffect(() => {
-    if (showChallengeIntro) {
+    if (showChallengeIntro && currentQuestion === 0) {
       const timer = setTimeout(() => {
         setShowChallengeIntro(false);
         setCurrentQuestion(1);
@@ -179,7 +179,7 @@ function AppContent() {
       }, 2250);
       return () => clearTimeout(timer);
     }
-  }, [showChallengeIntro, navigate]);
+  }, [showChallengeIntro, currentQuestion, navigate]);
 
 
 
@@ -574,11 +574,8 @@ function AppContent() {
               <button className="not-interested-btn" onClick={goBackToMain} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
                 Go Back
               </button>
-              <button className="not-interested-btn" onClick={() => { setPreviousPage('not-interested'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
+              <button className="not-interested-btn" onClick={() => { setPreviousPage('not-interested'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
                 About Step Zero
-              </button>
-              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
-                Take Survey Again (Reset)
               </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
