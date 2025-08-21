@@ -123,6 +123,8 @@ function AppContent() {
       setCurrentQuestion('4b');
     } else if (currentQuestion === '5a') {
       setCurrentQuestion('4a');
+    } else if (currentQuestion === '5c') {
+      setCurrentQuestion('5a');
     } else if (currentQuestion === '5b') {
       if (showEmailSection) {
         setShowEmailSection(false);
