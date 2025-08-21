@@ -1276,7 +1276,7 @@ function AppContent() {
                       onChange={(e) => handleInputChange('answer5b-email', e.target.value)}
                       key={`answer5b-email-${shakeTrigger}`}
                     />
-                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address (e.g., name@domain.com)</div>}
+                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address (e.g., name@example.com)</div>}
                   </div>
                 </div>
               )}
