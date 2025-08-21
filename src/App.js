@@ -192,11 +192,11 @@ function AppContent() {
 
 
   const startSurvey = () => {
-    if (surveyCompleted) {
-      // If survey is already completed, show the appropriate thank you page
+    if (surveyCompleted && lastThankYouType && lastThankYouType !== 'not-interested') {
+      // If survey is already completed and it wasn't from "not interested", show the appropriate thank you page
       setShowThankYou(true);
-      setThankYouType(lastThankYouType || 'completed');
-      navigate(`/thank-you/${lastThankYouType || 'completed'}`);
+      setThankYouType(lastThankYouType);
+      navigate(`/thank-you/${lastThankYouType}`);
       return;
     }
     
