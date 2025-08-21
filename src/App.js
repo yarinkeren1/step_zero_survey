@@ -1175,6 +1175,12 @@ function AppContent() {
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
           </div>
 
+          {(currentQuestion > 0 || typeof currentQuestion === 'string') && (
+            <button className="survey-exit-btn" onClick={goBackToMain}>
+              ×
+            </button>
+          )}
+
           <div className="survey">
             {showChallengeIntro && currentQuestion === 0 && !showThankYou && (
               <div className="question challenge-intro">
@@ -1199,7 +1205,7 @@ function AppContent() {
                     Back
                   </button>
                   <button className="continue-btn small" onClick={() => validateAndContinue(1)}>
-                    Continue
+                    Next
                   </button>
                 </div>
                 {errors.answer1 && <div className="error-message">Please provide a response</div>}
@@ -1224,7 +1230,7 @@ function AppContent() {
                     Back
                   </button>
                   <button className="continue-btn small" onClick={() => validateAndContinue(2)}>
-                    Continue
+                    Next
                   </button>
                 </div>
                 {errors.answer2 && <div className="error-message">Please provide a response</div>}
@@ -1259,7 +1265,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(3)}>
-                  Continue
+                  Next
                 </button>
               </div>
             </div>
@@ -1313,7 +1319,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(4, 'a')}>
-                  Continue
+                  Next
                 </button>
               </div>
             </div>
@@ -1360,7 +1366,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(4, 'b')}>
-                  Continue
+                  Next
                 </button>
               </div>
               
@@ -1430,7 +1436,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(5, 'a')}>
-                  Continue
+                  Next
                 </button>
               </div>
               
@@ -1479,7 +1485,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(5, 'c')}>
-                  Continue
+                  Next
                 </button>
               </div>
             </div>
@@ -1512,7 +1518,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(5, 'b')}>
-                  Continue
+                  Next
                 </button>
               </div>
               
@@ -1521,7 +1527,7 @@ function AppContent() {
                   <div className="text-input-container">
                     <input
                       type="email"
-                      className={`text-input ${errors['answer5b-email'] ? 'shake' : ''}`}
+                      className={`text-input ${errors['answer5b-email-empty'] || errors['answer5b-email-invalid'] ? 'shake' : ''}`}
                       placeholder="name@domain.com"
                       value={answers['answer5b-email'] || ''}
                       onChange={(e) => handleInputChange('answer5b-email', e.target.value)}
@@ -1563,7 +1569,7 @@ function AppContent() {
                     Back
                   </button>
                   <button className="continue-btn small" onClick={() => validateAndContinue(7)}>
-                    Continue
+                    Next
                   </button>
                 </div>
                 {errors.age && <div className="error-message">Please provide a valid age</div>}
@@ -1626,7 +1632,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(8)}>
-                  Continue
+                  Next
                 </button>
               </div>
             </div>
@@ -1659,7 +1665,7 @@ function AppContent() {
                   Back
                 </button>
                 <button className="continue-btn small" onClick={() => validateAndContinue(6)}>
-                  Continue
+                  Next
                 </button>
               </div>
               
