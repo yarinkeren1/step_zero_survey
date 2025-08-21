@@ -666,6 +666,7 @@ select.text-input option {
   gap: 30px;
   max-width: 600px;
   padding: 40px 20px;
+  margin-top: 60px;
   animation: fadeIn 0.8s ease;
 }
 
