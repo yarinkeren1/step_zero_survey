@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 function AppContent() {
@@ -1666,6 +1667,7 @@ function App() {
         <Route path="/survey/intro" element={<AppContent />} />
         <Route path="/survey/question/:questionNum" element={<AppContent />} />
       </Routes>
+      <Analytics />
     </Router>
   );
 }
