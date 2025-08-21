@@ -192,11 +192,16 @@ function AppContent() {
 
 
   const startSurvey = () => {
-    if (surveyCompleted && lastThankYouType && lastThankYouType !== 'not-interested') {
-      // If survey is already completed and it wasn't from "not interested", show the appropriate thank you page
+    // Check if survey was completed and if enough time has passed (1 minute)
+    const surveyCompletionTime = localStorage.getItem('surveyCompletionTime');
+    const currentTime = Date.now();
+    const oneMinute = 60 * 1000; // 60 seconds in milliseconds
+    
+    if (surveyCompleted && surveyCompletionTime && (currentTime - parseInt(surveyCompletionTime)) < oneMinute) {
+      // If survey was completed less than 1 minute ago, show the appropriate thank you page
       setShowThankYou(true);
-      setThankYouType(lastThankYouType);
-      navigate(`/thank-you/${lastThankYouType}`);
+      setThankYouType(lastThankYouType || 'completed');
+      navigate(`/thank-you/${lastThankYouType || 'completed'}`);
       return;
     }
     
@@ -228,6 +233,7 @@ function AppContent() {
     setSurveyCompleted(true);
     localStorage.setItem('surveyCompleted', 'true');
     localStorage.setItem('lastThankYouType', 'not-interested');
+    localStorage.setItem('surveyCompletionTime', Date.now().toString());
     navigate('/thank-you/not-interested');
   };
 
@@ -251,29 +257,7 @@ function AppContent() {
     navigate('/');
   };
 
-  const resetSurvey = () => {
-    setSurveyCompleted(false);
-    setLastThankYouType('');
-    localStorage.removeItem('surveyCompleted');
-    localStorage.removeItem('lastThankYouType');
-    setShowSurvey(false);
-    setShowThankYou(false);
-    setShowAbout(false);
-    setShowPrivacy(false);
-    setThankYouType('');
-    setCurrentQuestion(0);
-    setShowChallengeIntro(false);
-    setChallengeCompleted(null);
-    setAnswers({});
-    setShowOtherSection(false);
-    setShowOtherSection5a(false);
-    setShowEmailSection(false);
-    setShowMediaSection(false);
-    setSelectedFile(null);
-    setShowCheckmark(false);
-    setErrors({});
-    navigate('/');
-  };
+
 
   const goBack = () => {
     if (currentQuestion === 1) {
@@ -526,6 +510,7 @@ function AppContent() {
         setSurveyCompleted(true);
         localStorage.setItem('surveyCompleted', 'true');
         localStorage.setItem('lastThankYouType', type);
+        localStorage.setItem('surveyCompletionTime', Date.now().toString());
         navigate(`/thank-you/${type}`);
       } catch (error) {
         console.error('Error in completeSurvey:', error);
@@ -615,11 +600,8 @@ function AppContent() {
               <h2>Submitted</h2>
               <p>Congratulations on Taking Step One</p>
               <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
-              <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
+              <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
-              </button>
-              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
-                Take Survey Again (Reset)
               </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
@@ -645,11 +627,8 @@ function AppContent() {
               <h2>Submitted</h2>
               <p>Thanks for checking us out. Maybe next time.</p>
               <p className="subheading">Keep up with our socials in case you change your mind and to find out more about your next steps</p>
-              <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
+              <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
-              </button>
-              <button className="not-interested-btn" onClick={resetSurvey} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
-                Take Survey Again (Reset)
               </button>
               <div className="social-links">
                 <a href="https://www.instagram.com/accounts/login/" target="_blank" rel="noopener noreferrer">
