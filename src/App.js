@@ -201,14 +201,6 @@ function AppContent() {
 
 
   const startSurvey = () => {
-    if (surveyCompleted) {
-      // If survey is already completed, show the appropriate thank you page
-      setShowThankYou(true);
-      setThankYouType(lastThankYouType || 'completed');
-      navigate(`/thank-you/${lastThankYouType || 'completed'}`);
-      return;
-    }
-    
     // Clear any existing timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
