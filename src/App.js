@@ -33,7 +33,24 @@ function AppContent() {
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [lastThankYouType, setLastThankYouType] = useState('');
 
+  const homeBtnRef = useRef(null);
+  const aboutBtnRef = useRef(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
   const totalQuestions = 9;
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const target = showAbout ? aboutBtnRef.current : homeBtnRef.current;
+      if (target) {
+        const { offsetLeft, offsetWidth } = target;
+        setIndicatorStyle({ left: offsetLeft, width: offsetWidth });
+      }
+    };
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [showAbout, showThankYou, showPrivacy, showSurvey]);
 
   // Cookie consent functions
   const acceptCookies = () => {
@@ -554,9 +571,21 @@ function AppContent() {
       <div className="container">
         <div className="nav-bar">
           <div className="nav-links">
-            <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage(thankYouType); setShowThankYou(false); setShowAbout(true); navigate('/about'); }}>About</button>
+            <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+            <button
+              ref={aboutBtnRef}
+              className="nav-btn"
+              onClick={() => {
+                setPreviousPage(thankYouType);
+                setShowThankYou(false);
+                setShowAbout(true);
+                navigate('/about');
+              }}
+            >
+              About
+            </button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
+            <div className="nav-indicator" style={indicatorStyle}></div>
           </div>
         </div>
         <div className="progress-bar">
@@ -667,9 +696,14 @@ function AppContent() {
       <div className="container">
         <div className="nav-bar">
           <div className="nav-links">
-            <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn" onClick={() => { setPreviousPage('privacy'); setShowPrivacy(false); setShowAbout(true); navigate('/about'); }}>About</button>
+            <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+            <button
+              ref={aboutBtnRef}
+              className="nav-btn"
+              onClick={() => { setPreviousPage('privacy'); setShowPrivacy(false); setShowAbout(true); navigate('/about'); }}
+            >About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
+            <div className="nav-indicator" style={indicatorStyle}></div>
           </div>
         </div>
         <div className="privacy-page">
@@ -930,9 +964,10 @@ function AppContent() {
       <div className="container">
         <div className="nav-bar">
           <div className="nav-links">
-            <button className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button className="nav-btn">About</button>
+            <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+            <button ref={aboutBtnRef} className="nav-btn">About</button>
             <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
+            <div className="nav-indicator" style={indicatorStyle}></div>
           </div>
         </div>
         <div className="about-page">
@@ -1030,9 +1065,16 @@ function AppContent() {
         <>
           <div className="nav-bar">
             <div className="nav-links">
-              <button className="nav-btn" onClick={goBackToMain}>Home</button>
-              <button className="nav-btn" onClick={() => { setPreviousPage('hero'); setShowAbout(true); }}>About</button>
+              <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+              <button
+                ref={aboutBtnRef}
+                className="nav-btn"
+                onClick={() => { setPreviousPage('hero'); setShowAbout(true); }}
+              >
+                About
+              </button>
               <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
+              <div className="nav-indicator" style={indicatorStyle}></div>
             </div>
           </div>
           <div className="hero">

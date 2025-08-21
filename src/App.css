@@ -52,6 +52,15 @@ body {
 .nav-links {
   display: flex;
   gap: 30px;
+  position: relative;
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: -4px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: left 0.3s ease, width 0.3s ease;
 }
 
 
