@@ -160,7 +160,7 @@ function AppContent() {
       } else if (path.startsWith('/survey/question/')) {
         const questionNum = path.split('/')[3];
         setShowSurvey(true);
-        setCurrentQuestion(questionNum);
+        setCurrentQuestion(parseInt(questionNum) || questionNum);
         setShowChallengeIntro(false);
         setShowThankYou(false);
         setShowAbout(false);
