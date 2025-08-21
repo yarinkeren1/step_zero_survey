@@ -1313,7 +1313,7 @@ function AppContent() {
 
           {currentQuestion === 6 && (
             <div className="question">
-              <h3>Do you consent to have your response anonymously shared on our Instagram page?</h3>
+              <h3>Do you consent to having your response anonymously shared online?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question6 ? 'shake' : ''}`} key={`question6-${shakeTrigger}`}>
                   <div 
