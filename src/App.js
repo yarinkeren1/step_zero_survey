@@ -408,7 +408,7 @@ function AppContent() {
           {thankYouType === 'completed' && (
             <>
               <h2>Submitted</h2>
-              <p>Congratulations on taking step one</p>
+              <p>Congratulations on Taking Step One</p>
               <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
