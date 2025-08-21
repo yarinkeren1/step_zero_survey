@@ -57,9 +57,10 @@ body {
 
 .nav-indicator {
   position: absolute;
-  bottom: -4px;
+  bottom: -8px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 1px;
   transition: left 0.3s ease, width 0.3s ease;
 }
 
