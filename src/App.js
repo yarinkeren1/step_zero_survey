@@ -27,7 +27,7 @@ function AppContent() {
   const [showCookieBanner, setShowCookieBanner] = useState(true);
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
 
-  const totalQuestions = 8;
+  const totalQuestions = 9;
 
   // Cookie consent functions
   const acceptCookies = () => {
@@ -135,7 +135,7 @@ function AppContent() {
       setCurrentQuestion('5b');
     } else if (currentQuestion === 6) {
       if (challengeCompleted === 'Yes') {
-        setCurrentQuestion('5a');
+        setCurrentQuestion('5c');
       } else {
         setCurrentQuestion('5b');
       }
@@ -154,11 +154,12 @@ function AppContent() {
     else if (currentQuestion === 3) progress = 25;
     else if (currentQuestion === '4a') progress = 37.5;
     else if (currentQuestion === '5a') progress = 50;
+    else if (currentQuestion === '5c') progress = 56.25;
     else if (currentQuestion === '4b') progress = 37.5;
     else if (currentQuestion === '4b-other') progress = 43.75;
     else if (currentQuestion === '5b') progress = 50;
-    else if (currentQuestion === '5b-email') progress = 56.25;
-    else if (currentQuestion === 6) progress = 62.5;
+    else if (currentQuestion === '5b-email') progress = 62.5;
+    else if (currentQuestion === 6) progress = 68.75;
     else if (currentQuestion === 7) progress = 75;
     else if (currentQuestion === 8) progress = 87.5;
     return progress;
@@ -204,6 +205,8 @@ function AppContent() {
       } else {
         isValid = answers.question5b !== undefined;
       }
+    } else if (questionId === '5c') {
+      isValid = answers.question5c !== undefined;
     } else if (questionNumber === 6) {
       isValid = answers.question6 !== undefined;
       errorKey = 'question6';
@@ -246,6 +249,9 @@ function AppContent() {
         setCurrentQuestion('5b');
         navigate('/survey/question/5b');
       } else if (questionId === '5a') {
+        setCurrentQuestion('5c');
+        navigate('/survey/question/5c');
+      } else if (questionId === '5c') {
         setCurrentQuestion(6);
         navigate('/survey/question/6');
       } else if (questionId === '5b') {
@@ -265,7 +271,7 @@ function AppContent() {
       setErrors({ ...errors, [errorKey]: true });
       
       // Trigger shake animation to replay
-      if (questionNumber === 1 || questionNumber === 2 || questionNumber === 3 || questionId === '4a' || questionId === '4b' || questionId === '4b-other' || questionId === '5a' || questionId === '5b' || questionId === '5b-email' || questionNumber === 6 || questionNumber === 7 || questionNumber === 8) {
+      if (questionNumber === 1 || questionNumber === 2 || questionNumber === 3 || questionId === '4a' || questionId === '4b' || questionId === '4b-other' || questionId === '5a' || questionId === '5c' || questionId === '5b' || questionId === '5b-email' || questionNumber === 6 || questionNumber === 7 || questionNumber === 8) {
         setShakeTrigger(prev => prev + 1);
       }
     }
@@ -1126,6 +1132,39 @@ function AppContent() {
                   </button>
                 </div>
                 {errors.answer5a && <div className="error-message">Please provide a response</div>}
+              </div>
+            </div>
+          )}
+
+          {currentQuestion === '5c' && (
+            <div className="question">
+              <h3>Would you do another Step Zero challenge tomorrow?</h3>
+              <div className="options-container">
+                <div className={`options ${errors.question5c ? 'shake' : ''}`} key={`question5c-${shakeTrigger}`}>
+                  <div 
+                    className={`option ${answers.question5c === 'Yes' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5c', 'Yes')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">Yes</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question5c === 'No' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5c', 'No')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">No</div>
+                  </div>
+                </div>
+                {errors.question5c && <div className="error-message">Please choose a response</div>}
+              </div>
+              <div className="button-container">
+                <button className="back-btn small" onClick={goBack}>
+                  Back
+                </button>
+                <button className="continue-btn small" onClick={() => validateAndContinue(5, 'c')}>
+                  Continue
+                </button>
               </div>
             </div>
           )}
