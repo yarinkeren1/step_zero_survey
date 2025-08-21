@@ -13,6 +13,7 @@ function AppContent() {
   const [showThankYou, setShowThankYou] = useState(false);
   const [thankYouType, setThankYouType] = useState('');
   const [showOtherSection, setShowOtherSection] = useState(false);
+  const [showOtherSection5a, setShowOtherSection5a] = useState(false);
   const [showEmailSection, setShowEmailSection] = useState(false);
   const [showMediaSection, setShowMediaSection] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -97,6 +98,7 @@ function AppContent() {
     setChallengeCompleted(null);
     setAnswers({});
     setShowOtherSection(false);
+    setShowOtherSection5a(false);
     setShowEmailSection(false);
     setShowMediaSection(false);
     setSelectedFile(null);
@@ -176,19 +178,27 @@ function AppContent() {
       errorKey = 'answer4b-other';
     }
     
-    // Special case for 5a (text input)
-    if (questionId === '5a') {
-      errorKey = 'answer5a';
+    // Special case for 5a Other
+    if (questionId === '5a' && answers.question5a === 'Other') {
+      errorKey = 'answer5a-other';
     }
     
     let isValid = false;
 
-    if (questionNumber === 1 || questionNumber === 2 || questionId === '5a') {
+    if (questionNumber === 1 || questionNumber === 2) {
       const answer = answers[`answer${questionId}`] || '';
       isValid = answer.trim().length > 0;
       console.log(`Question ${questionId}: answer="${answer}", isValid=${isValid}`);
     } else if (questionNumber === 3) {
       isValid = answers[`question${questionNumber}`] !== undefined;
+    } else if (questionId === '5a') {
+      if (answers.question5a === 'Other') {
+        const answer = answers['answer5a-other'] || '';
+        isValid = answer.trim().length > 0;
+        errorKey = 'answer5a-other';
+      } else {
+        isValid = answers.question5a !== undefined;
+      }
     } else if (questionId === '4a') {
       isValid = answers.question4a !== undefined;
     } else if (questionId === '4b') {
@@ -273,7 +283,7 @@ function AppContent() {
       setErrors({ ...errors, [errorKey]: true });
       
       // Trigger shake animation to replay
-      if (questionNumber === 1 || questionNumber === 2 || questionNumber === 3 || questionId === '4a' || questionId === '4b' || questionId === '4b-other' || questionId === '5a' || questionId === '5c' || questionId === '5b' || questionId === '5b-email' || questionNumber === 6 || questionNumber === 7 || questionNumber === 8) {
+      if (questionNumber === 1 || questionNumber === 2 || questionNumber === 3 || questionId === '4a' || questionId === '4b' || questionId === '4b-other' || questionId === '5a' || questionId === '5a-other' || questionId === '5c' || questionId === '5b' || questionId === '5b-email' || questionNumber === 6 || questionNumber === 7 || questionNumber === 8) {
         setShakeTrigger(prev => prev + 1);
       }
     }
@@ -290,6 +300,12 @@ function AppContent() {
         setShowOtherSection(true);
       } else {
         setShowOtherSection(false);
+      }
+    } else if (questionId === 'question5a') {
+      if (option === 'Other') {
+        setShowOtherSection5a(true);
+      } else {
+        setShowOtherSection5a(false);
       }
     } else if (questionId === 'question5b') {
       if (option === 'Yes') {
@@ -1116,25 +1132,70 @@ function AppContent() {
           {currentQuestion === '5a' && (
             <div className="question">
               <h3>What made you decide to do it?</h3>
-              <div className="text-input-container">
-                <textarea
-                  className={`text-input ${errors.answer5a ? 'shake' : ''}`}
-                  placeholder="Enter your response..."
-                  value={answers.answer5a || ''}
-                  onChange={(e) => handleInputChange('answer5a', e.target.value)}
-                  rows="4"
-                  key={`answer5a-${shakeTrigger}`}
-                />
-                <div className="button-container">
-                  <button className="back-btn small" onClick={goBack}>
-                    Back
-                  </button>
-                  <button className="continue-btn small" onClick={() => validateAndContinue(5, 'a')}>
-                    Continue
-                  </button>
+              <div className="options-container">
+                <div className={`options ${errors.question5a ? 'shake' : ''}`} key={`question5a-${shakeTrigger}`}>
+                  <div 
+                    className={`option ${answers.question5a === 'I was just curious' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'I was just curious')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">I was just curious</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question5a === 'It was already a part of my routine' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'It was already a part of my routine')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">It was already a part of my routine</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question5a === 'It required minimal effort' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'It required minimal effort')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">It required minimal effort</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question5a === 'I wanted to push myself' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'I wanted to push myself')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">I wanted to push myself</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question5a === 'Other' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'Other')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">Other</div>
+                  </div>
                 </div>
-                {errors.answer5a && <div className="error-message">Please provide a response</div>}
+                {errors.question5a && <div className="error-message">Please choose a response</div>}
               </div>
+              <div className="button-container">
+                <button className="back-btn small" onClick={goBack}>
+                  Back
+                </button>
+                <button className="continue-btn small" onClick={() => validateAndContinue(5, 'a')}>
+                  Continue
+                </button>
+              </div>
+              
+              {showOtherSection5a && (
+                <div className="other-section">
+                  <div className="text-input-container">
+                    <textarea
+                      className={`text-input ${errors['answer5a-other'] ? 'shake' : ''}`}
+                      placeholder="Other..."
+                      value={answers['answer5a-other'] || ''}
+                      onChange={(e) => handleInputChange('answer5a-other', e.target.value)}
+                      rows="4"
+                      key={`answer5a-other-${shakeTrigger}`}
+                    />
+                    {errors['answer5a-other'] && <div className="error-message">Please provide a response</div>}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
