@@ -249,7 +249,7 @@ function AppContent() {
     } else if (questionId === '5b') {
       if (answers.question5b === 'Yes') {
         const answer = answers['answer5b-email'] || '';
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*$/;
         isValid = answer.trim().length > 0 && emailRegex.test(answer);
         errorKey = 'answer5b-email';
       } else {
@@ -1318,7 +1318,7 @@ function AppContent() {
                       onChange={(e) => handleInputChange('answer5b-email', e.target.value)}
                       key={`answer5b-email-${shakeTrigger}`}
                     />
-                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address with a proper domain (e.g., name@example.com)</div>}
+                    {errors['answer5b-email'] && <div className="error-message">Please provide a valid email address</div>}
                   </div>
                 </div>
               )}
