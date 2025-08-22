@@ -5,6 +5,41 @@ import { supabase } from './supabase';
 import './App.css';
 
 function AppContent() {
+  // Add error boundary
+  const [hasError, setHasError] = useState(false);
+  
+  if (hasError) {
+    return (
+      <div style={{ 
+        padding: '20px', 
+        textAlign: 'center', 
+        color: 'white', 
+        backgroundColor: '#1a1a1a',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <h2>Something went wrong</h2>
+        <p>Please refresh the page or try again later.</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
+  }
+
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
@@ -85,21 +120,26 @@ function AppContent() {
 
   // Check for existing cookie consent and survey completion on component mount
   useEffect(() => {
-    const savedCookieConsent = localStorage.getItem('cookiesAccepted');
-    const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
-    const savedLastThankYouType = localStorage.getItem('lastThankYouType');
-    
-    if (savedCookieConsent) {
-      setCookiesAccepted(savedCookieConsent === 'true' ? true : savedCookieConsent === 'necessary' ? 'necessary' : false);
-      setShowCookieBanner(false);
-    }
-    
-    if (savedSurveyCompleted === 'true') {
-      setSurveyCompleted(true);
-    }
-    
-    if (savedLastThankYouType) {
-      setLastThankYouType(savedLastThankYouType);
+    try {
+      const savedCookieConsent = localStorage.getItem('cookiesAccepted');
+      const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
+      const savedLastThankYouType = localStorage.getItem('lastThankYouType');
+      
+      if (savedCookieConsent) {
+        setCookiesAccepted(savedCookieConsent === 'true' ? true : savedCookieConsent === 'necessary' ? 'necessary' : false);
+        setShowCookieBanner(false);
+      }
+      
+      if (savedSurveyCompleted === 'true') {
+        setSurveyCompleted(true);
+      }
+      
+      if (savedLastThankYouType) {
+        setLastThankYouType(savedLastThankYouType);
+      }
+    } catch (error) {
+      console.error('Error in initial useEffect:', error);
+      setHasError(true);
     }
   }, []);
 
