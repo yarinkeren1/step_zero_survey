@@ -743,6 +743,24 @@ function AppContent() {
               console.log('✅ TESTING: Email backup sent successfully');
             } else {
               console.log('❌ TESTING: Email backup also failed');
+              
+              // Fallback: Save to localStorage as last resort
+              try {
+                const failedSubmissions = JSON.parse(localStorage.getItem('failedSurveySubmissions') || '[]');
+                const submissionWithTimestamp = {
+                  ...surveyData,
+                  timestamp: Date.now(),
+                  id: `failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                  fileData: selectedFile ? await fileToBase64(selectedFile) : null,
+                  fileName: selectedFile ? selectedFile.name : null
+                };
+                failedSubmissions.push(submissionWithTimestamp);
+                localStorage.setItem('failedSurveySubmissions', JSON.stringify(failedSubmissions));
+                console.log('💾 Survey data saved to localStorage as last resort');
+                console.log('Total failed submissions in localStorage:', failedSubmissions.length);
+              } catch (localStorageError) {
+                console.error('Error saving to localStorage:', localStorageError);
+              }
             }
           }
 
