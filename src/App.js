@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { supabase } from './supabase';
 import './App.css';
 
 function AppContent() {
@@ -531,9 +532,45 @@ function AppContent() {
     setCurrentQuestion(6);
   };
 
-  const completeSurvey = () => {
-    const timer = setTimeout(() => {
+  const completeSurvey = async () => {
+    const timer = setTimeout(async () => {
       try {
+        // Prepare survey data for Supabase
+        const surveyData = {
+          challenge_completed: challengeCompleted,
+          question1_answer: answers.answer1 || '',
+          question2_answer: answers.answer2 || '',
+          question3_answer: answers.question3 || '',
+          question4a_answer: answers.question4a || '',
+          question4b_answer: answers.question4b || '',
+          question4b_other: answers['answer4b-other'] || '',
+          question5a_answer: answers.question5a || '',
+          question5a_other: answers['answer5a-other'] || '',
+          question5b_answer: answers.question5b || '',
+          question5b_email: answers['answer5b-email'] || '',
+          question5c_answer: answers.question5c || '',
+          question6_answer: answers.question6 || '',
+          question7_age: answers.age || '',
+          question8_gender: answers.gender || '',
+          terms_consent: termsConsent,
+          completion_time: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          ip_address: 'client-side', // Will be captured server-side if needed
+          survey_version: '1.0'
+        };
+
+        // Send data to Supabase
+        const { data, error } = await supabase
+          .from('survey_responses')
+          .insert([surveyData]);
+
+        if (error) {
+          console.error('Error saving survey response:', error);
+          // Continue with survey completion even if save fails
+        } else {
+          console.log('Survey response saved successfully:', data);
+        }
+
         setShowThankYou(true);
         const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
         setThankYouType(type);
@@ -545,6 +582,16 @@ function AppContent() {
         navigate(`/thank-you/${type}`);
       } catch (error) {
         console.error('Error in completeSurvey:', error);
+        // Continue with survey completion even if save fails
+        setShowThankYou(true);
+        const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+        setThankYouType(type);
+        setLastThankYouType(type);
+        setSurveyCompleted(true);
+        localStorage.setItem('surveyCompleted', 'true');
+        localStorage.setItem('lastThankYouType', type);
+        localStorage.setItem('surveyCompletionTime', Date.now().toString());
+        navigate(`/thank-you/${type}`);
       }
     }, 600);
     
