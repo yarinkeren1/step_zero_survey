@@ -7,6 +7,8 @@ const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 console.log('Supabase configuration check:', {
   hasUrl: !!supabaseUrl,
   hasKey: !!supabaseAnonKey,
+  urlLength: supabaseUrl ? supabaseUrl.length : 0,
+  keyLength: supabaseAnonKey ? supabaseAnonKey.length : 0,
   isProduction: process.env.NODE_ENV === 'production'
 })
 
@@ -18,4 +20,8 @@ export const supabase = supabaseUrl && supabaseAnonKey
 // Log client status
 if (!supabase) {
   console.warn('Supabase client not initialized - environment variables may be missing')
+  console.log('supabaseUrl:', supabaseUrl ? 'present' : 'missing')
+  console.log('supabaseAnonKey:', supabaseAnonKey ? 'present' : 'missing')
+} else {
+  console.log('Supabase client initialized successfully')
 }
