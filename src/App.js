@@ -1331,25 +1331,32 @@ function AppContent() {
               <div className="options-container">
                 <div className={`options ${errors.question4b ? 'shake' : ''}`} key={`question4b-${shakeTrigger}`}>
                   <div 
-                    className={`option ${answers.question4b === 'No Time' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'No Time')}
+                    className={`option ${answers.question4b === 'I didn\'t have time' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', 'I didn\'t have time')}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">No Time</div>
+                    <div className="option-text">I didn't have time</div>
                   </div>
                   <div 
-                    className={`option ${answers.question4b === 'Nervous' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'Nervous')}
+                    className={`option ${answers.question4b === 'I was too nervous' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', 'I was too nervous')}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">Nervous</div>
+                    <div className="option-text">I was too nervous</div>
                   </div>
                   <div 
-                    className={`option ${answers.question4b === 'Not Interested' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'Not Interested')}
+                    className={`option ${answers.question4b === 'I thought it was pointless' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', 'I thought it was pointless')}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">Not Interested</div>
+                    <div className="option-text">I thought it was pointless</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question4b === 'I\'m not interested' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', 'I\'m not interested')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">I'm not interested</div>
                   </div>
                   <div 
                     className={`option ${answers.question4b === 'Other' ? 'selected' : ''}`}
