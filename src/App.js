@@ -821,17 +821,45 @@ function AppContent() {
     }
   };
 
+  // Function to convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Function to send email backup
   const sendEmailBackup = async (surveyData) => {
     try {
       console.log('Sending email backup...');
+      
+      // Convert file to base64 if it exists (limit to 5MB for email)
+      let fileBase64 = null;
+      if (selectedFile) {
+        const maxEmailSize = 5 * 1024 * 1024; // 5MB limit for email
+        if (selectedFile.size <= maxEmailSize) {
+          try {
+            fileBase64 = await fileToBase64(selectedFile);
+            console.log('File converted to base64 successfully');
+          } catch (error) {
+            console.error('Error converting file to base64:', error);
+          }
+        } else {
+          console.log('File too large for email backup, skipping file data');
+        }
+      }
       
       // Add file information to the email data
       const emailData = {
         ...surveyData,
         file_info: selectedFile ? `File attached: ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)` : 'No file attached',
         file_uploaded: selectedFile ? 'Yes' : 'No',
-        file_download_note: selectedFile ? 'Note: File was uploaded to Supabase Storage. You can access it through your Supabase dashboard.' : ''
+        file_base64: fileBase64 || 'No file data',
+        file_type: selectedFile ? selectedFile.type : 'No file',
+        file_download_note: selectedFile ? 'File data included in email. You can save it by copying the base64 data and converting it back to a file.' : ''
       };
       
       const result = await emailjs.send(
