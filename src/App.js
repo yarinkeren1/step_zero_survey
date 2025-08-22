@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { supabase } from './supabase';
+import emailjs from '@emailjs/browser';
 import './App.css';
 
 function AppContent() {
@@ -79,6 +80,11 @@ function AppContent() {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
   const totalQuestions = 9;
+
+  // EmailJS configuration
+  const EMAILJS_PUBLIC_KEY = 'ilfTXIUCME6n3-XCC';
+  const EMAILJS_SERVICE_ID = 'service_dj40m4g';
+  const EMAILJS_TEMPLATE_ID = 'template_nev3k64';
 
   useEffect(() => {
     const updateIndicator = () => {
@@ -705,6 +711,8 @@ function AppContent() {
           console.log('Attempting to save survey data to Supabase...');
           console.log('Survey data:', surveyData);
           
+          let supabaseSuccess = false;
+          
           if (supabase) {
             console.log('Supabase client is available');
             const { data, error } = await supabase
@@ -718,11 +726,23 @@ function AppContent() {
             } else {
               console.log('Survey response saved successfully:', data);
               console.log('Saved data:', data);
+              supabaseSuccess = true;
             }
           } else {
             console.error('Supabase client is not available - check your environment variables');
             console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
             console.log('Supabase Key exists:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
+          }
+
+          // Send email backup if Supabase fails
+          if (!supabaseSuccess) {
+            console.log('Supabase failed, sending email backup...');
+            const emailSuccess = await sendEmailBackup(surveyData);
+            if (emailSuccess) {
+              console.log('Email backup sent successfully');
+            } else {
+              console.log('Email backup also failed');
+            }
           }
 
           setShowThankYou(true);
@@ -797,6 +817,24 @@ function AppContent() {
     } catch (error) {
       console.error('Error in getSignedUrl:', error);
       return null;
+    }
+  };
+
+  // Function to send email backup
+  const sendEmailBackup = async (surveyData) => {
+    try {
+      console.log('Sending email backup...');
+      const result = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        surveyData,
+        EMAILJS_PUBLIC_KEY
+      );
+      console.log('Email backup sent successfully:', result);
+      return true;
+    } catch (error) {
+      console.error('Error sending email backup:', error);
+      return false;
     }
   };
 
