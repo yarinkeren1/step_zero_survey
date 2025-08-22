@@ -713,7 +713,7 @@ function AppContent() {
           
           let supabaseSuccess = false;
           
-          if (supabase) {
+          if (supabase && false) { // Temporarily force Supabase to fail for testing
             console.log('Supabase client is available');
             const { data, error } = await supabase
               .from('survey_responses')
