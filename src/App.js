@@ -86,6 +86,11 @@ function AppContent() {
   const EMAILJS_SERVICE_ID = 'service_dj40m4g';
   const EMAILJS_TEMPLATE_ID = 'template_nev3k64';
 
+  // Initialize EmailJS
+  useEffect(() => {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }, []);
+
   useEffect(() => {
     const updateIndicator = () => {
       // Don't show indicator on thank you pages
@@ -743,24 +748,6 @@ function AppContent() {
               console.log('✅ TESTING: Email backup sent successfully');
             } else {
               console.log('❌ TESTING: Email backup also failed');
-              
-              // Fallback: Save to localStorage as last resort
-              try {
-                const failedSubmissions = JSON.parse(localStorage.getItem('failedSurveySubmissions') || '[]');
-                const submissionWithTimestamp = {
-                  ...surveyData,
-                  timestamp: Date.now(),
-                  id: `failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  fileData: selectedFile ? await fileToBase64(selectedFile) : null,
-                  fileName: selectedFile ? selectedFile.name : null
-                };
-                failedSubmissions.push(submissionWithTimestamp);
-                localStorage.setItem('failedSurveySubmissions', JSON.stringify(failedSubmissions));
-                console.log('💾 Survey data saved to localStorage as last resort');
-                console.log('Total failed submissions in localStorage:', failedSubmissions.length);
-              } catch (localStorageError) {
-                console.error('Error saving to localStorage:', localStorageError);
-              }
             }
           }
 
@@ -880,16 +867,33 @@ function AppContent() {
         file_download_note: selectedFile ? 'File data included in email. You can save it by copying the base64 data and converting it back to a file.' : ''
       };
       
-      const result = await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        emailData,
-        EMAILJS_PUBLIC_KEY
-      );
-      console.log('Email backup sent successfully:', result);
-      return true;
+      // Try sending email with retry logic
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          console.log(`Attempting to send email (attempt ${4 - retries}/3)...`);
+          const result = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            emailData,
+            EMAILJS_PUBLIC_KEY
+          );
+          console.log('Email backup sent successfully:', result);
+          return true;
+        } catch (error) {
+          console.error(`Email attempt ${4 - retries}/3 failed:`, error);
+          retries--;
+          if (retries > 0) {
+            console.log(`Retrying in 2 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+      }
+      
+      console.error('All email attempts failed');
+      return false;
     } catch (error) {
-      console.error('Error sending email backup:', error);
+      console.error('Error in sendEmailBackup:', error);
       return false;
     }
   };
