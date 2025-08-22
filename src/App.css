@@ -148,6 +148,17 @@ body {
   justify-content: center;
 }
 
+.continue-btn.small:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.continue-btn.small:disabled:hover {
+  background-color: #6c757d;
+  transform: none;
+}
+
 .back-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -275,6 +286,30 @@ body {
   text-transform: uppercase !important;
   text-align: center !important;
   width: 100%;
+}
+
+.submitted-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeInOut 2.25s ease-in-out;
+}
+
+.submitted-content h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 0;
+  text-transform: uppercase;
 }
 
 .question h3 {

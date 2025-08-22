@@ -9,6 +9,7 @@ function AppContent() {
   const location = useLocation();
   const params = useParams();
   const timerRef = useRef(null);
+  const submittedTimerRef = useRef(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
   const [showChallengeIntro, setShowChallengeIntro] = useState(false);
@@ -33,6 +34,10 @@ function AppContent() {
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [lastThankYouType, setLastThankYouType] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finalQuestionSubmitted, setFinalQuestionSubmitted] = useState(false);
+  const [showSubmitted, setShowSubmitted] = useState(false);
+  const [surveyHidden, setSurveyHidden] = useState(false);
 
   const homeBtnRef = useRef(null);
   const aboutBtnRef = useRef(null);
@@ -42,10 +47,16 @@ function AppContent() {
 
   useEffect(() => {
     const updateIndicator = () => {
+      // Don't show indicator on thank you pages
+      if (showThankYou) {
+        setIndicatorStyle({ left: 0, width: 0, opacity: 0 });
+        return;
+      }
+      
       const target = showAbout ? aboutBtnRef.current : homeBtnRef.current;
       if (target) {
         const { offsetLeft, offsetWidth } = target;
-        setIndicatorStyle({ left: offsetLeft, width: offsetWidth });
+        setIndicatorStyle({ left: offsetLeft, width: offsetWidth, opacity: 1 });
       }
     };
     updateIndicator();
@@ -90,6 +101,15 @@ function AppContent() {
     if (savedLastThankYouType) {
       setLastThankYouType(savedLastThankYouType);
     }
+  }, []);
+
+  // Cleanup submitted timer on unmount
+  useEffect(() => {
+    return () => {
+      if (submittedTimerRef.current) {
+        clearTimeout(submittedTimerRef.current);
+      }
+    };
   }, []);
 
   // Handle browser back/forward navigation and route changes
@@ -211,6 +231,9 @@ function AppContent() {
 
 
   const startSurvey = () => {
+    // Reset final question submitted state
+    setFinalQuestionSubmitted(false);
+    
     // Check if survey was completed and if enough time has passed (1 minute)
     const surveyCompletionTime = localStorage.getItem('surveyCompletionTime');
     const currentTime = Date.now();
@@ -236,6 +259,7 @@ function AppContent() {
     setShowSurvey(true);
     setCurrentQuestion(0); // Reset to ensure clean state
     setShowChallengeIntro(true);
+    setSurveyHidden(false);
     navigate('/survey/intro');
   };
 
@@ -328,6 +352,8 @@ function AppContent() {
       navigate('/survey/question/6');
     } else if (currentQuestion === 8) {
       setCurrentQuestion(7);
+      setFinalQuestionSubmitted(false);
+      setIsSubmitting(false);
       navigate('/survey/question/7');
     }
   };
@@ -347,11 +373,18 @@ function AppContent() {
     else if (currentQuestion === '5b-email') progress = 62.5;
     else if (currentQuestion === 6) progress = 68.75;
     else if (currentQuestion === 7) progress = 75;
-    else if (currentQuestion === 8) progress = 87.5;
+    else if (currentQuestion === 8) progress = 100;
     return progress;
   };
 
   const validateAndContinue = (questionNumber, suffix = '') => {
+    console.log('validateAndContinue called with:', { questionNumber, suffix, finalQuestionSubmitted, isSubmitting });
+    // Only prevent submission on the final question (question 8)
+    if (questionNumber === 8 && finalQuestionSubmitted) {
+      console.log('Returning early due to finalQuestionSubmitted');
+      return;
+    }
+    
     const questionId = suffix ? `${questionNumber}${suffix}` : questionNumber;
     let errorKey = (questionNumber === 1 || questionNumber === 2 || questionId === '4b-other' || questionId === '5b-email') ? `answer${questionId}` : `question${questionId}`;
     
@@ -424,9 +457,11 @@ function AppContent() {
       const hasConsent = termsConsent;
       isValid = hasGender && hasConsent;
       errorKey = hasGender ? 'consent' : 'gender';
+      console.log('Question 8 validation:', { gender, hasGender, hasConsent, isValid, errorKey });
     }
 
     if (isValid) {
+      console.log('Validation passed, proceeding with navigation');
       // Clear email-specific errors when validation passes
       if (questionId === '5b') {
         setErrors({ 
@@ -477,7 +512,10 @@ function AppContent() {
         setCurrentQuestion(8);
         navigate('/survey/question/8');
       } else if (questionNumber === 8) {
+        console.log('Calling completeSurvey for question 8');
+        setFinalQuestionSubmitted(true);
         completeSurvey();
+        return; // Add return to prevent further execution
       }
     } else {
       console.log(`Setting error for ${errorKey}`);
@@ -533,70 +571,148 @@ function AppContent() {
   };
 
   const completeSurvey = async () => {
-    const timer = setTimeout(async () => {
-      try {
-        // Prepare survey data for Supabase
-        const surveyData = {
-          challenge_completed: challengeCompleted,
-          question1_answer: answers.answer1 || '',
-          question2_answer: answers.answer2 || '',
-          question3_answer: answers.question3 || '',
-          question4a_answer: answers.question4a || '',
-          question4b_answer: answers.question4b || '',
-          question4b_other: answers['answer4b-other'] || '',
-          question5a_answer: answers.question5a || '',
-          question5a_other: answers['answer5a-other'] || '',
-          question5b_answer: answers.question5b || '',
-          question5b_email: answers['answer5b-email'] || '',
-          question5c_answer: answers.question5c || '',
-          question6_answer: answers.question6 || '',
-          question7_age: answers.age || '',
-          question8_gender: answers.gender || '',
-          terms_consent: termsConsent,
-          completion_time: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-          ip_address: 'client-side', // Will be captured server-side if needed
-          survey_version: '1.0'
-        };
-
-        // Send data to Supabase
-        const { data, error } = await supabase
-          .from('survey_responses')
-          .insert([surveyData]);
-
-        if (error) {
-          console.error('Error saving survey response:', error);
-          // Continue with survey completion even if save fails
-        } else {
-          console.log('Survey response saved successfully:', data);
-        }
-
-        setShowThankYou(true);
-        const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
-        setThankYouType(type);
-        setLastThankYouType(type);
-        setSurveyCompleted(true);
-        localStorage.setItem('surveyCompleted', 'true');
-        localStorage.setItem('lastThankYouType', type);
-        localStorage.setItem('surveyCompletionTime', Date.now().toString());
-        navigate(`/thank-you/${type}`);
-      } catch (error) {
-        console.error('Error in completeSurvey:', error);
-        // Continue with survey completion even if save fails
-        setShowThankYou(true);
-        const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
-        setThankYouType(type);
-        setLastThankYouType(type);
-        setSurveyCompleted(true);
-        localStorage.setItem('surveyCompleted', 'true');
-        localStorage.setItem('lastThankYouType', type);
-        localStorage.setItem('surveyCompletionTime', Date.now().toString());
-        navigate(`/thank-you/${type}`);
-      }
-    }, 600);
+    console.log('completeSurvey function called');
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      console.log('Already submitting, returning early');
+      return;
+    }
     
-    // Cleanup function to prevent memory leaks
-    return () => clearTimeout(timer);
+    console.log('Setting isSubmitting to true and showing submitted page');
+    setIsSubmitting(true);
+    
+    // Show submitted page first
+    console.log('Setting showSubmitted to true and surveyHidden to true');
+    setShowSubmitted(true);
+    setSurveyHidden(true);
+    
+    // After 2.25 seconds (same as intro), proceed with submission
+    submittedTimerRef.current = setTimeout(async () => {
+      setShowSubmitted(false);
+      
+      // Wait for fade out animation to complete, then show thank you page
+      setTimeout(async () => {
+        try {
+          // Upload file to Supabase Storage if consent was given and file exists
+          let fileUrl = null;
+          console.log('File upload check:', { selectedFile: !!selectedFile, question6: answers.question6, supabase: !!supabase });
+          if (selectedFile && answers.question6 === 'Yes' && supabase) {
+            try {
+              console.log('Uploading file to Supabase Storage...');
+              console.log('File details:', { name: selectedFile.name, size: selectedFile.size, type: selectedFile.type });
+              
+              // Sanitize filename to remove spaces and special characters
+              const sanitizedName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+              const fileName = `${Date.now()}_${sanitizedName}`;
+              console.log('Original filename:', selectedFile.name);
+              console.log('Sanitized filename:', sanitizedName);
+              console.log('Generated filename:', fileName);
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('survey_media')
+                .upload(fileName, selectedFile);
+
+              if (uploadError) {
+                console.error('Error uploading file:', uploadError);
+                console.error('Upload error details:', uploadError.message);
+                // Continue without file upload - don't fail the entire survey
+              } else {
+                console.log('File uploaded successfully:', uploadData);
+                // For private bucket, we store the file path instead of public URL
+                // The file can be accessed later using signed URLs
+                fileUrl = `${fileName}`;
+                console.log('File path stored:', fileUrl);
+              }
+            } catch (fileError) {
+              console.error('Error in file upload:', fileError);
+              console.error('File error details:', fileError.message);
+              // Continue without file upload - don't fail the entire survey
+            }
+          } else {
+            console.log('Skipping file upload:', { 
+              hasFile: !!selectedFile, 
+              consent: answers.question6 === 'Yes', 
+              hasSupabase: !!supabase 
+            });
+          }
+
+          // Prepare survey data for Supabase
+          const surveyData = {
+            challenge_completed: challengeCompleted,
+            question1_answer: answers.answer1 || '',
+            question2_answer: answers.answer2 || '',
+            question3_answer: answers.question3 || '',
+            question4a_answer: answers.question4a || '',
+            question4b_answer: answers.question4b || '',
+            question4b_other: answers['answer4b-other'] || '',
+            question5a_answer: answers.question5a || '',
+            question5a_other: answers['answer5a-other'] || '',
+            question5b_answer: answers.question5b || '',
+            question5b_email: answers['answer5b-email'] || '',
+            question5c_answer: answers.question5c || '',
+            question6_answer: answers.question6 || '',
+            question7_age: answers.age || '',
+            question8_gender: answers.gender || '',
+            terms_consent: termsConsent,
+            completion_time: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+            ip_address: 'client-side', // Will be captured server-side if needed
+            survey_version: '1.0',
+            media_file_url: fileUrl, // Add the file URL to the survey data
+            media_file_name: selectedFile ? selectedFile.name : null
+          };
+
+          // Send data to Supabase
+          console.log('Attempting to save survey data to Supabase...');
+          console.log('Survey data:', surveyData);
+          
+          if (supabase) {
+            console.log('Supabase client is available');
+            const { data, error } = await supabase
+              .from('survey_responses')
+              .insert([surveyData]);
+
+            if (error) {
+              console.error('Error saving survey response:', error);
+              console.error('Error details:', error.message);
+              // Continue with survey completion even if save fails
+            } else {
+              console.log('Survey response saved successfully:', data);
+              console.log('Saved data:', data);
+            }
+          } else {
+            console.error('Supabase client is not available - check your environment variables');
+            console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
+            console.log('Supabase Key exists:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
+          }
+
+          setShowThankYou(true);
+          const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+          setThankYouType(type);
+          setLastThankYouType(type);
+          setSurveyCompleted(true);
+          setIsSubmitting(false); // Reset submitting state
+          setFinalQuestionSubmitted(false); // Reset final question state
+          localStorage.setItem('surveyCompleted', 'true');
+          localStorage.setItem('lastThankYouType', type);
+          localStorage.setItem('surveyCompletionTime', Date.now().toString());
+          navigate(`/thank-you/${type}`);
+        } catch (error) {
+          console.error('Error in completeSurvey:', error);
+          // Continue with survey completion even if save fails
+          setShowThankYou(true);
+          const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+          setThankYouType(type);
+          setLastThankYouType(type);
+          setSurveyCompleted(true);
+          setIsSubmitting(false); // Reset submitting state
+          setFinalQuestionSubmitted(false); // Reset final question state
+          localStorage.setItem('surveyCompleted', 'true');
+          localStorage.setItem('lastThankYouType', type);
+          localStorage.setItem('surveyCompletionTime', Date.now().toString());
+          navigate(`/thank-you/${type}`);
+        }
+      }, 18); // Wait for fade out animation
+    }, 2250);
   };
 
   const handleFileUpload = (event) => {
@@ -621,6 +737,27 @@ function AppContent() {
   const removeFile = () => {
     setSelectedFile(null);
     setShowCheckmark(false);
+  };
+
+  // Function to get signed URL for accessing private files
+  const getSignedUrl = async (filePath) => {
+    if (!supabase || !filePath) return null;
+    
+    try {
+      const { data, error } = await supabase.storage
+        .from('survey_media')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return null;
+      }
+      
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error in getSignedUrl:', error);
+      return null;
+    }
   };
 
   const handleInputChange = (questionId, value) => {
@@ -695,7 +832,7 @@ function AppContent() {
           )}
           {thankYouType === 'completed' && (
             <>
-              <h2>Submitted</h2>
+              <h2>Thank You</h2>
               <p>Congratulations on Taking Step One</p>
               <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
@@ -722,7 +859,7 @@ function AppContent() {
           )}
           {thankYouType === 'not-completed' && (
             <>
-              <h2>Submitted</h2>
+              <h2>Thank You</h2>
               <p>Thanks for checking us out. Maybe next time.</p>
               <p className="subheading">Keep up with our socials in case you change your mind and to find out more about your next steps</p>
               <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
@@ -1216,7 +1353,15 @@ function AppContent() {
         </>
       )}
 
-      {showSurvey && (
+      {showSubmitted && (
+        <div className="submitted-overlay">
+          <div className="submitted-content">
+            <h3>SUBMITTED</h3>
+          </div>
+        </div>
+      )}
+
+      {showSurvey && !showSubmitted && !showThankYou && !surveyHidden && (
         <>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
@@ -1229,11 +1374,13 @@ function AppContent() {
           )}
 
           <div className="survey">
-            {showChallengeIntro && currentQuestion === 0 && !showThankYou && (
-              <div className="question challenge-intro">
-                <h3>Tell us about your challenge</h3>
-              </div>
-            )}
+                      {showChallengeIntro && currentQuestion === 0 && !showThankYou && (
+            <div className="question challenge-intro">
+              <h3>Tell us about your challenge</h3>
+            </div>
+          )}
+
+
 
           {currentQuestion === 1 && (
             <div className="question">
@@ -1251,7 +1398,10 @@ function AppContent() {
                   <button className="back-btn small" onClick={goBack}>
                     Back
                   </button>
-                  <button className="continue-btn small" onClick={() => validateAndContinue(1)}>
+                  <button 
+                    className="continue-btn small" 
+                    onClick={() => validateAndContinue(1)}
+                  >
                     Next
                   </button>
                 </div>
@@ -1276,7 +1426,10 @@ function AppContent() {
                   <button className="back-btn small" onClick={goBack}>
                     Back
                   </button>
-                  <button className="continue-btn small" onClick={() => validateAndContinue(2)}>
+                  <button 
+                    className="continue-btn small" 
+                    onClick={() => validateAndContinue(2)}
+                  >
                     Next
                   </button>
                 </div>
@@ -1311,7 +1464,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(3)}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(3)}
+                >
                   Next
                 </button>
               </div>
@@ -1365,7 +1521,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(4, 'a')}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(4, 'a')}
+                >
                   Next
                 </button>
               </div>
@@ -1419,7 +1578,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(4, 'b')}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(4, 'b')}
+                >
                   Next
                 </button>
               </div>
@@ -1489,7 +1651,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(5, 'a')}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(5, 'a')}
+                >
                   Next
                 </button>
               </div>
@@ -1538,7 +1703,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(5, 'c')}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(5, 'c')}
+                >
                   Next
                 </button>
               </div>
@@ -1571,7 +1739,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(5, 'b')}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(5, 'b')}
+                >
                   Next
                 </button>
               </div>
@@ -1622,7 +1793,10 @@ function AppContent() {
                   <button className="back-btn small" onClick={goBack}>
                     Back
                   </button>
-                  <button className="continue-btn small" onClick={() => validateAndContinue(7)}>
+                  <button 
+                    className="continue-btn small" 
+                    onClick={() => validateAndContinue(7)}
+                  >
                     Next
                   </button>
                 </div>
@@ -1685,7 +1859,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(8)}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(8)}
+                >
                   Next
                 </button>
               </div>
@@ -1718,7 +1895,10 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button className="continue-btn small" onClick={() => validateAndContinue(6)}>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(6)}
+                >
                   Next
                 </button>
               </div>
