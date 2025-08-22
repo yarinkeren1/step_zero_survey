@@ -732,16 +732,17 @@ function AppContent() {
             console.error('Supabase client is not available - check your environment variables');
             console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
             console.log('Supabase Key exists:', !!process.env.REACT_APP_SUPABASE_ANON_KEY);
+            console.log('🚨 TESTING: Supabase intentionally disabled for email backup testing');
           }
 
           // Send email backup if Supabase fails
           if (!supabaseSuccess) {
-            console.log('Supabase failed, sending email backup...');
+            console.log('🚨 TESTING: Supabase failed, sending email backup...');
             const emailSuccess = await sendEmailBackup(surveyData);
             if (emailSuccess) {
-              console.log('Email backup sent successfully');
+              console.log('✅ TESTING: Email backup sent successfully');
             } else {
-              console.log('Email backup also failed');
+              console.log('❌ TESTING: Email backup also failed');
             }
           }
 
