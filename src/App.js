@@ -844,17 +844,25 @@ function AppContent() {
       // Convert file to base64 if it exists (limit to 5MB for email)
       let fileBase64 = null;
       if (selectedFile) {
+        console.log('Processing file for email backup:', {
+          name: selectedFile.name,
+          size: selectedFile.size,
+          type: selectedFile.type
+        });
+        
         const maxEmailSize = 5 * 1024 * 1024; // 5MB limit for email
         if (selectedFile.size <= maxEmailSize) {
           try {
             fileBase64 = await fileToBase64(selectedFile);
-            console.log('File converted to base64 successfully');
+            console.log('File converted to base64 successfully, length:', fileBase64.length);
           } catch (error) {
             console.error('Error converting file to base64:', error);
           }
         } else {
           console.log('File too large for email backup, skipping file data');
         }
+      } else {
+        console.log('No file selected for email backup');
       }
       
       // Add file information to the email data
@@ -864,8 +872,16 @@ function AppContent() {
         file_uploaded: selectedFile ? 'Yes' : 'No',
         file_base64: fileBase64 || 'No file data',
         file_type: selectedFile ? selectedFile.type : 'No file',
+        file_name: selectedFile ? selectedFile.name : 'No file',
+        file_size: selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'No file',
         file_download_note: selectedFile ? 'File data included in email. You can save it by copying the base64 data and converting it back to a file.' : ''
       };
+
+      console.log('Email data prepared:', {
+        hasFile: !!selectedFile,
+        fileBase64Length: fileBase64 ? fileBase64.length : 0,
+        fileType: selectedFile ? selectedFile.type : 'No file'
+      });
       
       // Try sending email with retry logic
       let retries = 3;
