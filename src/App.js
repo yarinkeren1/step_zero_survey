@@ -825,10 +825,19 @@ function AppContent() {
   const sendEmailBackup = async (surveyData) => {
     try {
       console.log('Sending email backup...');
+      
+      // Add file information to the email data
+      const emailData = {
+        ...surveyData,
+        file_info: selectedFile ? `File attached: ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)` : 'No file attached',
+        file_uploaded: selectedFile ? 'Yes' : 'No',
+        file_download_note: selectedFile ? 'Note: File was uploaded to Supabase Storage. You can access it through your Supabase dashboard.' : ''
+      };
+      
       const result = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        surveyData,
+        emailData,
         EMAILJS_PUBLIC_KEY
       );
       console.log('Email backup sent successfully:', result);
