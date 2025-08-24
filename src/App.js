@@ -451,9 +451,19 @@ function AppContent() {
     
     let isValid = false;
 
-    if (questionNumber === 1 || questionNumber === 2) {
+    if (questionNumber === 1) {
       const answer = answers[`answer${questionId}`] || '';
       isValid = answer.trim().length > 0;
+      console.log(`Question ${questionId}: answer="${answer}", isValid=${isValid}`);
+    } else if (questionNumber === 2) {
+      const answer = answers[`answer${questionId}`] || '';
+      if (answer === 'Other') {
+        const otherAnswer = answers['answer2-other'] || '';
+        isValid = otherAnswer.trim().length > 0;
+        errorKey = 'answer2-other';
+      } else {
+        isValid = answer.trim().length > 0;
+      }
       console.log(`Question ${questionId}: answer="${answer}", isValid=${isValid}`);
     } else if (questionNumber === 3) {
       isValid = answers[`question${questionNumber}`] !== undefined;
@@ -691,6 +701,7 @@ function AppContent() {
             challenge_completed: challengeCompleted,
             question1_answer: answers.answer1 || '',
             question2_answer: answers.answer2 || '',
+            question2_other: answers['answer2-other'] || '',
             question3_answer: answers.question3 || '',
             question4a_answer: answers.question4a || '',
             question4b_answer: answers.question4b || '',
@@ -1537,7 +1548,7 @@ function AppContent() {
 
           {currentQuestion === 1 && (
             <div className="question">
-              <h3>What did your card say?</h3>
+              <h3>What challenge were you given?</h3>
               <div className="text-input-container">
                 <textarea
                   className={`text-input ${errors.answer1 ? 'shake' : ''}`}
@@ -1567,14 +1578,32 @@ function AppContent() {
             <div className="question">
               <h3>Where did you find your card?</h3>
               <div className="text-input-container">
-                <textarea
+                <select
                   className={`text-input ${errors.answer2 ? 'shake' : ''}`}
-                  placeholder="Enter the location where you found your card..."
                   value={answers.answer2 || ''}
                   onChange={(e) => handleInputChange('answer2', e.target.value)}
-                  rows="4"
                   key={`answer2-${shakeTrigger}`}
-                />
+                >
+                  <option value="">Select location</option>
+                  <option value="Cafe">Cafe</option>
+                  <option value="Exercise Studio (Yoga, Pilates, Spin, HIIT)">Exercise Studio (Yoga, Pilates, Spin, HIIT)</option>
+                  <option value="Library">Library</option>
+                  <option value="Mall">Mall</option>
+                  <option value="Other">Other</option>
+                </select>
+                
+                {answers.answer2 === 'Other' && (
+                  <textarea
+                    className={`text-input ${errors['answer2-other'] ? 'shake' : ''}`}
+                    placeholder="Please specify other location..."
+                    value={answers['answer2-other'] || ''}
+                    onChange={(e) => handleInputChange('answer2-other', e.target.value)}
+                    rows="4"
+                    key={`answer2-other-${shakeTrigger}`}
+                    style={{ marginTop: '10px' }}
+                  />
+                )}
+                
                 <div className="button-container">
                   <button className="back-btn small" onClick={goBack}>
                     Back
@@ -1587,6 +1616,7 @@ function AppContent() {
                   </button>
                 </div>
                 {errors.answer2 && <div className="error-message">Please provide a response</div>}
+                {errors['answer2-other'] && <div className="error-message">Please specify the other location</div>}
               </div>
             </div>
           )}
