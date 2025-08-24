@@ -48,7 +48,13 @@ function AppContent() {
   const submittedTimerRef = useRef(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
-  const [showChallengeIntro, setShowChallengeIntro] = useState(false);
+  const [showLocationSelection, setShowLocationSelection] = useState(false);
+  const [showChallengeAssignment, setShowChallengeAssignment] = useState(false);
+  const [showChallengeText, setShowChallengeText] = useState(false);
+  const [challengeFadeIn, setChallengeFadeIn] = useState(false);
+  const [challengeAssignmentTimer, setChallengeAssignmentTimer] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [assignedChallenge, setAssignedChallenge] = useState('');
   const [challengeCompleted, setChallengeCompleted] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showThankYou, setShowThankYou] = useState(false);
@@ -80,6 +86,88 @@ function AppContent() {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
   const totalQuestions = 9;
+
+  // Challenge data structure
+  const challengeSets = {
+    'Beach/Park': [
+      'Sit and take in nature and the sounds around you for 15 minutes, without checking your phone',
+      'Pay a stranger a genuine compliment',
+      'Throw away a couple pieces of trash, even if they\'re not yours',
+      'Strike up a meaningful conversation with someone who is clearly outside your demographic',
+      'Exist without distractions for 30 minutes, no phone, no music, just observe your environment or enjoy nature',
+      'Give up your personal comfort: pick up a piece of trash, give up your seat, help someone who looks like they can use it.',
+      'Hold the door for 3 different people today'
+    ],
+    'Coffee Shop/Library': [
+      'Create a mini plan today for a goal you\'ve been delaying',
+      'Start a conversation with a stranger, ask them how their day is going',
+      'Journal when you get home today',
+      'Take a cold shower today',
+      'Do not complain about anything for the whole day tomorrow',
+      'Stay off of all social media for the rest of today',
+      'Stay off your phone until you finish one of your tasks that you came here to complete',
+      'Start working on a business idea you\'ve had, or try to come up with one to start working on',
+      'Physically write out your plan towards a goal of yours',
+      'Draw out an idea that you\'ve had recently for a product or service',
+      'Set a new goal for yourself',
+      'Make plans for how you will achieve your current goals'
+    ],
+    'Fitness Class (Yoga, HIIT, Spin, Pilates)': [
+      'Sit still for 5 minutes after class with your eyes closed and take a moment for yourself',
+      'Hold your hardest pose 10 seconds longer than you want to',
+      'Ask your instructor what they think you should focus on most',
+      'Take 10 minutes after class to practice your hardest pose',
+      'Compliment someone in class on their practice',
+      'Set a new goal for your practice',
+      'Plan out how you should achieve your current goals for your practice',
+      'Attend a class that you are intimidated by or generally avoid'
+    ],
+    'Martial Arts Gym': [
+      'Stay after class and drill what you learned today',
+      'Roll with at least two higher belts today',
+      'Show up to the next class 15 minutes early',
+      'Thank all of your coaches after class today',
+      'Ask your trainers what you can be doing better with your technique',
+      'Ask to roll with your coach',
+      'Commit to a goal in your training and write down the steps you\'ll take to reach it'
+    ],
+    'Movies/Mall/Bowling/Arcade/Theme Park': [
+      'Sit and take in nature and the sounds around you for 15 minutes, without checking your phone',
+      'Pay a stranger a genuine compliment',
+      'Throw away a couple pieces of trash, even if they\'re not yours',
+      'Strike up a meaningful conversation with someone who is clearly outside your demographic',
+      'Exist without distractions for 30 minutes, no phone, no music, just observe your environment or enjoy nature',
+      'Give up your personal comfort: pick up a piece of trash, give up your seat, help someone who looks like they can use it.',
+      'Hold the door for 3 different people today'
+    ],
+    'Office': [
+      'Do the hardest task on your list first thing today',
+      'Turn off your notifications for 1 hour and do deep work',
+      'Thank someone for their help this week, in person',
+      'Plan tomorrow\'s 3 \'must-do\' tasks before leaving the office today',
+      'Avoid drinking coffee today',
+      'Write down 1 way that you can improve in the office and what you can do to implement it'
+    ],
+    'Weightlifting Gym': [
+      'Spend 10 minutes stretching after your workout',
+      'Take a cold shower today',
+      'Avoid looking at your phone this workout',
+      'Complete an extra set on each workout today',
+      'Do 10 minutes on the stair master before or after your workout today',
+      'Do a 10 minute light jog on the treadmill before or after your workout',
+      'Rep your next exercise until failure, real failure',
+      'Commit to a goal in the gym and write down steps you\'ll take to achieve it',
+      'Workout with no music today'
+    ]
+  };
+
+  // Helper function to get random challenge
+  const getRandomChallenge = (location) => {
+    const challenges = challengeSets[location];
+    if (!challenges) return '';
+    const randomIndex = Math.floor(Math.random() * challenges.length);
+    return challenges[randomIndex];
+  };
 
   // EmailJS configuration
   const EMAILJS_PUBLIC_KEY = 'ilfTXIUCME6n3-XCC';
@@ -136,6 +224,12 @@ function AppContent() {
       const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
       const savedLastThankYouType = localStorage.getItem('lastThankYouType');
       
+      // Check for saved survey progress
+      const savedLocation = localStorage.getItem('stepZeroLocation');
+      const savedChallenge = localStorage.getItem('stepZeroChallenge');
+      const savedAnswers = localStorage.getItem('stepZeroAnswers');
+      const savedCurrentQuestion = localStorage.getItem('stepZeroCurrentQuestion');
+      
       if (savedCookieConsent) {
         setCookiesAccepted(savedCookieConsent === 'true' ? true : savedCookieConsent === 'necessary' ? 'necessary' : false);
         setShowCookieBanner(false);
@@ -148,11 +242,29 @@ function AppContent() {
       if (savedLastThankYouType) {
         setLastThankYouType(savedLastThankYouType);
       }
+
+      // Restore survey progress if exists
+      if (savedLocation && savedChallenge) {
+        setSelectedLocation(savedLocation);
+        setAssignedChallenge(savedChallenge);
+        if (savedAnswers) {
+          setAnswers(JSON.parse(savedAnswers));
+        }
+        if (savedCurrentQuestion) {
+          setCurrentQuestion(parseInt(savedCurrentQuestion));
+        }
+        // Show challenge assignment screen if user was in progress
+        if (savedCurrentQuestion && parseInt(savedCurrentQuestion) === 0) {
+          setShowSurvey(true);
+          setShowChallengeAssignment(true);
+          setChallengeFadeIn(true);
+        }
+      }
     } catch (error) {
       console.error('Error in initial useEffect:', error);
       setHasError(true);
     }
-  }, []);
+  }, [navigate]);
 
   // Cleanup submitted timer on unmount
   useEffect(() => {
@@ -160,8 +272,11 @@ function AppContent() {
       if (submittedTimerRef.current) {
         clearTimeout(submittedTimerRef.current);
       }
+      if (challengeAssignmentTimer) {
+        clearTimeout(challengeAssignmentTimer);
+      }
     };
-  }, []);
+  }, [challengeAssignmentTimer]);
 
   // Handle browser back/forward navigation and route changes
   useEffect(() => {
@@ -175,7 +290,10 @@ function AppContent() {
       setShowPrivacy(false);
       setThankYouType('');
       setCurrentQuestion(0);
-      setShowChallengeIntro(false);
+      setShowLocationSelection(false);
+      setShowChallengeAssignment(false);
+      setSelectedLocation('');
+      setAssignedChallenge('');
       setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
@@ -194,7 +312,10 @@ function AppContent() {
       setShowAbout(false);
       setShowPrivacy(false);
       setCurrentQuestion(0);
-      setShowChallengeIntro(false);
+      setShowLocationSelection(false);
+      setShowChallengeAssignment(false);
+      setSelectedLocation('');
+      setAssignedChallenge('');
       setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
@@ -211,7 +332,10 @@ function AppContent() {
       setShowThankYou(false);
       setShowPrivacy(false);
       setCurrentQuestion(0);
-      setShowChallengeIntro(false);
+      setShowLocationSelection(false);
+      setShowChallengeAssignment(false);
+      setSelectedLocation('');
+      setAssignedChallenge('');
       setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
@@ -228,7 +352,10 @@ function AppContent() {
       setShowThankYou(false);
       setShowAbout(false);
       setCurrentQuestion(0);
-      setShowChallengeIntro(false);
+      setShowLocationSelection(false);
+      setShowChallengeAssignment(false);
+      setSelectedLocation('');
+      setAssignedChallenge('');
       setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
@@ -238,36 +365,13 @@ function AppContent() {
       setSelectedFile(null);
       setShowCheckmark(false);
       setErrors({});
-    } else if (path === '/survey/intro') {
-      // Survey intro only - don't interfere with survey questions
-      setShowSurvey(true);
-      setCurrentQuestion(0);
-      setShowChallengeIntro(true);
-      setShowThankYou(false);
-      setShowAbout(false);
-      setShowPrivacy(false);
     }
     // Note: We don't handle /survey/question/* routes here to avoid interfering with survey flow
   }, [location.pathname]);
 
 
 
-  useEffect(() => {
-    if (showChallengeIntro && currentQuestion === 0 && !timerRef.current) {
-      timerRef.current = setTimeout(() => {
-        setShowChallengeIntro(false);
-        setCurrentQuestion(1);
-        navigate('/survey/question/1');
-        timerRef.current = null;
-      }, 2250);
-      return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-        }
-      };
-    }
-  }, [showChallengeIntro, currentQuestion, navigate]);
+
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -308,23 +412,35 @@ function AppContent() {
     }
     
     setShowSurvey(true);
-    setCurrentQuestion(0); // Reset to ensure clean state
-    setShowChallengeIntro(true);
+    setShowLocationSelection(true);
+    setShowChallengeAssignment(false);
+    setSelectedLocation('');
+    setAssignedChallenge('');
     setSurveyHidden(false);
-    navigate('/survey/intro');
   };
 
   const showNotInterested = () => {
-    // Always show the "not-interested" thank you page, regardless of previous survey state
-    setShowSurvey(false);
-    setShowThankYou(true);
-    setThankYouType('not-interested');
-    setLastThankYouType('not-interested');
-    setSurveyCompleted(true);
-    localStorage.setItem('surveyCompleted', 'true');
-    localStorage.setItem('lastThankYouType', 'not-interested');
-    localStorage.setItem('surveyCompletionTime', Date.now().toString());
-    navigate('/thank-you/not-interested');
+    // If we're in the challenge text screen, go back to location selection
+    if (showChallengeText) {
+      setShowChallengeText(false);
+      setShowLocationSelection(true);
+      setShowSurvey(true);
+      setCurrentQuestion(0);
+      setSelectedLocation('');
+      setAssignedChallenge('');
+      navigate('/survey/location');
+    } else {
+      // Otherwise show the "not-interested" thank you page
+      setShowSurvey(false);
+      setShowThankYou(true);
+      setThankYouType('not-interested');
+      setLastThankYouType('not-interested');
+      setSurveyCompleted(true);
+      localStorage.setItem('surveyCompleted', 'true');
+      localStorage.setItem('lastThankYouType', 'not-interested');
+      localStorage.setItem('surveyCompletionTime', Date.now().toString());
+      navigate('/thank-you/not-interested');
+    }
   };
 
   const goBackToMain = () => {
@@ -334,7 +450,10 @@ function AppContent() {
     setShowPrivacy(false);
     setThankYouType('');
     setCurrentQuestion(0);
-    setShowChallengeIntro(false);
+    setShowLocationSelection(false);
+    setShowChallengeAssignment(false);
+    setSelectedLocation('');
+    setAssignedChallenge('');
     setChallengeCompleted(null);
     setAnswers({});
     setShowOtherSection(false);
@@ -344,6 +463,13 @@ function AppContent() {
     setSelectedFile(null);
     setShowCheckmark(false);
     setErrors({});
+    
+    // Clear saved progress
+    localStorage.removeItem('stepZeroLocation');
+    localStorage.removeItem('stepZeroChallenge');
+    localStorage.removeItem('stepZeroAnswers');
+    localStorage.removeItem('stepZeroCurrentQuestion');
+    
     navigate('/');
   };
 
@@ -351,10 +477,10 @@ function AppContent() {
 
   const goBack = () => {
     if (currentQuestion === 1) {
-      setShowSurvey(false);
-      setShowChallengeIntro(false);
+      setShowChallengeAssignment(true);
+      setChallengeFadeIn(true);
       setCurrentQuestion(0);
-      navigate('/');
+      navigate('/survey/location');
     } else if (currentQuestion === 2) {
       setCurrentQuestion(1);
       navigate('/survey/question/1');
@@ -412,19 +538,22 @@ function AppContent() {
   const updateProgress = () => {
     let progress = 0;
     if (showThankYou && thankYouType !== 'not-interested') progress = 100;
-    else if (currentQuestion === 1) progress = 0;
-    else if (currentQuestion === 2) progress = 12.5;
-    else if (currentQuestion === 3) progress = 25;
-    else if (currentQuestion === '4a') progress = 37.5;
-    else if (currentQuestion === '5a') progress = 50;
-    else if (currentQuestion === '5c') progress = 56.25;
-    else if (currentQuestion === '4b') progress = 37.5;
-    else if (currentQuestion === '4b-other') progress = 43.75;
-    else if (currentQuestion === '5b') progress = 50;
-    else if (currentQuestion === '5b-email') progress = 62.5;
-    else if (currentQuestion === 6) progress = 68.75;
-    else if (currentQuestion === 7) progress = 75;
+    else if (showLocationSelection) progress = 10;
+    else if (showChallengeAssignment) progress = 20;
+    else if (showChallengeText) progress = 25;
+    else if (currentQuestion === 1) progress = 30;
+    else if (currentQuestion === 3) progress = 40;
+    else if (currentQuestion === '4a') progress = 50;
+    else if (currentQuestion === '5a') progress = 60;
+    else if (currentQuestion === '5c') progress = 70;
+    else if (currentQuestion === '4b') progress = 50;
+    else if (currentQuestion === '4b-other') progress = 55;
+    else if (currentQuestion === '5b') progress = 60;
+    else if (currentQuestion === '5b-email') progress = 65;
+    else if (currentQuestion === 6) progress = 75;
+    else if (currentQuestion === 7) progress = 85;
     else if (currentQuestion === 8) progress = 100;
+    else if (showSurvey && !showLocationSelection && !showChallengeAssignment && !showChallengeText && currentQuestion === 0) progress = 5;
     return progress;
   };
 
@@ -452,9 +581,7 @@ function AppContent() {
     let isValid = false;
 
     if (questionNumber === 1) {
-      const answer = answers[`answer${questionId}`] || '';
-      isValid = answer.trim().length > 0;
-      console.log(`Question ${questionId}: answer="${answer}", isValid=${isValid}`);
+      isValid = answers.question3 !== undefined;
     } else if (questionNumber === 2) {
       const answer = answers[`answer${questionId}`] || '';
       if (answer === 'Other') {
@@ -535,42 +662,54 @@ function AppContent() {
       }
       
       if (questionNumber === 1) {
-        setCurrentQuestion(2);
-        navigate('/survey/question/2');
+        setCurrentQuestion(3);
+        localStorage.setItem('stepZeroCurrentQuestion', '3');
+        navigate('/survey/question/3');
       } else if (questionNumber === 2) {
         setCurrentQuestion(3);
+        localStorage.setItem('stepZeroCurrentQuestion', '3');
         navigate('/survey/question/3');
       } else if (questionNumber === 3) {
         if (challengeCompleted === 'Yes') {
           setCurrentQuestion('4a');
+          localStorage.setItem('stepZeroCurrentQuestion', '4a');
           navigate('/survey/question/4a');
         } else {
           setCurrentQuestion('4b');
+          localStorage.setItem('stepZeroCurrentQuestion', '4b');
           navigate('/survey/question/4b');
         }
       } else if (questionId === '4a') {
         setCurrentQuestion('5a');
+        localStorage.setItem('stepZeroCurrentQuestion', '5a');
         navigate('/survey/question/5a');
       } else if (questionId === '4b') {
         setCurrentQuestion('5b');
+        localStorage.setItem('stepZeroCurrentQuestion', '5b');
         navigate('/survey/question/5b');
       } else if (questionId === '4b-other') {
         setCurrentQuestion('5b');
+        localStorage.setItem('stepZeroCurrentQuestion', '5b');
         navigate('/survey/question/5b');
       } else if (questionId === '5a') {
         setCurrentQuestion('5c');
+        localStorage.setItem('stepZeroCurrentQuestion', '5c');
         navigate('/survey/question/5c');
       } else if (questionId === '5c') {
         setCurrentQuestion(6);
+        localStorage.setItem('stepZeroCurrentQuestion', '6');
         navigate('/survey/question/6');
       } else if (questionId === '5b') {
         setCurrentQuestion(6);
+        localStorage.setItem('stepZeroCurrentQuestion', '6');
         navigate('/survey/question/6');
       } else if (questionNumber === 6) {
         setCurrentQuestion(7);
+        localStorage.setItem('stepZeroCurrentQuestion', '7');
         navigate('/survey/question/7');
       } else if (questionNumber === 7) {
         setCurrentQuestion(8);
+        localStorage.setItem('stepZeroCurrentQuestion', '8');
         navigate('/survey/question/8');
       } else if (questionNumber === 8) {
         console.log('Calling completeSurvey for question 8');
@@ -589,9 +728,74 @@ function AppContent() {
     }
   };
 
+  const selectLocation = (location) => {
+    setSelectedLocation(location);
+    setErrors({ ...errors, location: false });
+  };
+
+  const assignChallenge = () => {
+    if (!selectedLocation) {
+      setErrors({ ...errors, location: true });
+      setShakeTrigger(prev => prev + 1);
+      return;
+    }
+
+    const challenge = getRandomChallenge(selectedLocation);
+    setAssignedChallenge(challenge);
+    
+    // Save progress to localStorage
+    localStorage.setItem('stepZeroLocation', selectedLocation);
+    localStorage.setItem('stepZeroChallenge', challenge);
+    localStorage.setItem('stepZeroCurrentQuestion', '0');
+    
+    // Fade out location selection
+    setShowLocationSelection(false);
+    
+    // Fade in challenge assignment screen after a brief delay
+    setTimeout(() => {
+      setShowChallengeAssignment(true);
+      setChallengeFadeIn(true);
+      
+      // Auto-fade out after 2.25 seconds (like the old intro)
+      const timer = setTimeout(() => {
+        setChallengeFadeIn(false);
+        setTimeout(() => {
+          setShowChallengeAssignment(false);
+          setShowChallengeText(true);
+        }, 300);
+      }, 2250);
+      
+      setChallengeAssignmentTimer(timer);
+    }, 300);
+  };
+
+
+
+  const continueToSurvey = () => {
+    setShowChallengeText(false);
+    setCurrentQuestion(1);
+    localStorage.setItem('stepZeroCurrentQuestion', '1');
+    navigate('/survey/question/1');
+  };
+
+  const saveProgress = () => {
+    try {
+      localStorage.setItem('stepZeroAnswers', JSON.stringify(answers));
+      localStorage.setItem('stepZeroCurrentQuestion', currentQuestion.toString());
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  };
+
   const selectOption = (questionId, option) => {
-    setAnswers({ ...answers, [questionId]: option });
+    const newAnswers = { ...answers, [questionId]: option };
+    setAnswers(newAnswers);
     setErrors({ ...errors, [questionId]: false });
+
+    // Save progress after each answer
+    setTimeout(() => {
+      localStorage.setItem('stepZeroAnswers', JSON.stringify(newAnswers));
+    }, 100);
 
     if (questionId === 'question3') {
       setChallengeCompleted(option);
@@ -699,9 +903,8 @@ function AppContent() {
           // Prepare survey data for Supabase
           const surveyData = {
             challenge_completed: challengeCompleted,
-            question1_answer: answers.answer1 || '',
-            question2_answer: answers.answer2 || '',
-            question2_other: answers['answer2-other'] || '',
+            selected_location: selectedLocation,
+            assigned_challenge: assignedChallenge,
             question3_answer: answers.question3 || '',
             question4a_answer: answers.question4a || '',
             question4b_answer: answers.question4b || '',
@@ -718,7 +921,7 @@ function AppContent() {
             completion_time: new Date().toISOString(),
             user_agent: navigator.userAgent,
             ip_address: 'client-side', // Will be captured server-side if needed
-            survey_version: '1.0',
+            survey_version: '2.0',
             media_file_url: fileUrl, // Add the file URL to the survey data
             media_file_name: selectedFile ? selectedFile.name : null
           };
@@ -1538,88 +1741,107 @@ function AppContent() {
           )}
 
           <div className="survey">
-                      {showChallengeIntro && currentQuestion === 0 && !showThankYou && (
-            <div className="question challenge-intro">
-              <h3>Tell us about your challenge</h3>
-            </div>
-          )}
+            {showLocationSelection && (
+              <div className="question location-selection fade-in">
+                <h3>Where did you find your card?</h3>
+                <div className="text-input-container">
+                  <select
+                    className={`text-input ${errors.location ? 'shake' : ''}`}
+                    value={selectedLocation}
+                    onChange={(e) => selectLocation(e.target.value)}
+                    key={`location-${shakeTrigger}`}
+                  >
+                    <option value="">Select location</option>
+                    <option value="Beach/Park">Beach/Park</option>
+                    <option value="Coffee Shop/Library">Coffee Shop/Library</option>
+                    <option value="Fitness Class (Yoga, HIIT, Spin, Pilates)">Fitness Class (Yoga, HIIT, Spin, Pilates)</option>
+                    <option value="Martial Arts Gym">Martial Arts Gym</option>
+                    <option value="Movies/Mall/Bowling/Arcade/Theme Park">Movies/Mall/Bowling/Arcade/Theme Park</option>
+                    <option value="Office">Office</option>
+                    <option value="Weightlifting Gym">Weightlifting Gym</option>
+                  </select>
+                  {errors.location && <div className="error-message">Please select a location</div>}
+                </div>
+                <div className="button-container">
+                  <button className="back-btn small" onClick={goBackToMain}>
+                    Back
+                  </button>
+                  <button 
+                    className="continue-btn small" 
+                    onClick={assignChallenge}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showChallengeAssignment && (
+              <div className="question challenge-assignment">
+                <h3>Here is your challenge, come back when you've completed it</h3>
+              </div>
+            )}
+
+            {showChallengeText && (
+              <div className="question challenge-text-screen fade-in">
+                <div className="challenge-text">
+                  {assignedChallenge}
+                </div>
+                <div className="challenge-instructions">
+                  <p>Complete this challenge, then return to this page to continue the survey.</p>
+                </div>
+                <div className="button-container">
+                  <button className="back-btn small" onClick={showNotInterested}>
+                    Not Interested
+                  </button>
+                  <button className="continue-btn small" onClick={continueToSurvey}>
+                    I've Completed it
+                  </button>
+                </div>
+              </div>
+            )}
+
+
 
 
 
           {currentQuestion === 1 && (
             <div className="question">
-              <h3>What challenge were you given?</h3>
-              <div className="text-input-container">
-                <textarea
-                  className={`text-input ${errors.answer1 ? 'shake' : ''}`}
-                  placeholder="Enter the challenge written on your card..."
-                  value={answers.answer1 || ''}
-                  onChange={(e) => handleInputChange('answer1', e.target.value)}
-                  rows="4"
-                  key={`answer1-${shakeTrigger}`}
-                />
-                <div className="button-container">
-                  <button className="back-btn small" onClick={goBack}>
-                    Back
-                  </button>
-                  <button 
-                    className="continue-btn small" 
-                    onClick={() => validateAndContinue(1)}
+              <h3>Did you complete your challenge?</h3>
+              <div className="options-container">
+                <div className={`options ${errors.question3 ? 'shake' : ''}`} key={`question3-${shakeTrigger}`}>
+                  <div 
+                    className={`option ${answers.question3 === 'Yes' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question3', 'Yes')}
                   >
-                    Next
-                  </button>
+                    <div className="radio-circle"></div>
+                    <div className="option-text">Yes</div>
+                  </div>
+                  <div 
+                    className={`option ${answers.question3 === 'Not Yet' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question3', 'Not Yet')}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">Not Yet</div>
+                  </div>
                 </div>
-                {errors.answer1 && <div className="error-message">Please provide a response</div>}
+                {errors.question3 && <div className="error-message">Please choose a response</div>}
+              </div>
+              <div className="button-container">
+                <button className="back-btn small" onClick={goBack}>
+                  Back
+                </button>
+                <button 
+                  className="continue-btn small" 
+                  onClick={() => validateAndContinue(1)}
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
 
-          {currentQuestion === 2 && (
-            <div className="question">
-              <h3>Where did you find your card?</h3>
-              <div className="text-input-container">
-                <select
-                  className={`text-input ${errors.answer2 ? 'shake' : ''}`}
-                  value={answers.answer2 || ''}
-                  onChange={(e) => handleInputChange('answer2', e.target.value)}
-                  key={`answer2-${shakeTrigger}`}
-                >
-                  <option value="">Select location</option>
-                  <option value="Cafe">Cafe</option>
-                  <option value="Exercise Studio (Yoga, Pilates, Spin, HIIT)">Exercise Studio (Yoga, Pilates, Spin, HIIT)</option>
-                  <option value="Library">Library</option>
-                  <option value="Mall">Mall</option>
-                  <option value="Other">Other</option>
-                </select>
-                
-                {answers.answer2 === 'Other' && (
-                  <input
-                    type="text"
-                    className={`text-input ${errors['answer2-other'] ? 'shake' : ''}`}
-                    placeholder="Please specify other location..."
-                    value={answers['answer2-other'] || ''}
-                    onChange={(e) => handleInputChange('answer2-other', e.target.value)}
-                    key={`answer2-other-${shakeTrigger}`}
-                    style={{ marginTop: '10px' }}
-                  />
-                )}
-                
-                <div className="button-container">
-                  <button className="back-btn small" onClick={goBack}>
-                    Back
-                  </button>
-                  <button 
-                    className="continue-btn small" 
-                    onClick={() => validateAndContinue(2)}
-                  >
-                    Next
-                  </button>
-                </div>
-                {errors.answer2 && <div className="error-message">Please select location</div>}
-                {errors['answer2-other'] && <div className="error-message">Please specify the other location</div>}
-              </div>
-            </div>
-          )}
+
 
           {currentQuestion === 3 && (
             <div className="question">
@@ -2156,6 +2378,7 @@ function App() {
         <Route path="/privacy" element={<AppContent />} />
         <Route path="/thank-you/:type" element={<AppContent />} />
         <Route path="/survey/intro" element={<AppContent />} />
+        <Route path="/survey/location" element={<AppContent />} />
         <Route path="/survey/question/:questionNum" element={<AppContent />} />
       </Routes>
       <Analytics />
