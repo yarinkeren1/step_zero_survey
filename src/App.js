@@ -1593,12 +1593,12 @@ function AppContent() {
                 </select>
                 
                 {answers.answer2 === 'Other' && (
-                  <textarea
+                  <input
+                    type="text"
                     className={`text-input ${errors['answer2-other'] ? 'shake' : ''}`}
                     placeholder="Please specify other location..."
                     value={answers['answer2-other'] || ''}
                     onChange={(e) => handleInputChange('answer2-other', e.target.value)}
-                    rows="4"
                     key={`answer2-other-${shakeTrigger}`}
                     style={{ marginTop: '10px' }}
                   />
@@ -1615,7 +1615,7 @@ function AppContent() {
                     Next
                   </button>
                 </div>
-                {errors.answer2 && <div className="error-message">Please provide a response</div>}
+                {errors.answer2 && <div className="error-message">Please select location</div>}
                 {errors['answer2-other'] && <div className="error-message">Please specify the other location</div>}
               </div>
             </div>
