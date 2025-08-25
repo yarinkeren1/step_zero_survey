@@ -89,75 +89,70 @@ function AppContent() {
 
   // Challenge data structure
   const challengeSets = {
-    'Beach/Park': [
-      'Sit and take in nature and the sounds around you for 15 minutes, without checking your phone',
-      'Pay a stranger a genuine compliment',
-      'Throw away a couple pieces of trash, even if they\'re not yours',
+    'Beach / Park / Public Spaces': [
+      'Sit in stillness for 15 minutes. No phone, no music—just observe your surroundings.',
+      'Offer a stranger a sincere compliment—make it personal, not performative.',
+      'Pick up and dispose of at least two pieces of litter that aren\'t yours',
       'Strike up a meaningful conversation with someone who is clearly outside your demographic',
-      'Exist without distractions for 30 minutes, no phone, no music, just observe your environment or enjoy nature',
-      'Give up your personal comfort: pick up a piece of trash, give up your seat, help someone who looks like they can use it.',
-      'Hold the door for 3 different people today'
+      'Spend 30 minutes without looking at your phone. Be fully present in your environment.',
+      'Hold the door open for three different people today.'
     ],
-    'Coffee Shop/Library': [
-      'Create a mini plan today for a goal you\'ve been delaying',
-      'Start a conversation with a stranger, ask them how their day is going',
-      'Journal when you get home today',
+    'Coffee Shop / Library': [
+      'Map out a realistic step-by-step plan for a goal you\'ve been avoiding.',
+      'Initiate a conversation with someone nearby—ask how their day is going.',
+      'Journal about your day when you get the chance',
       'Take a cold shower today',
-      'Do not complain about anything for the whole day tomorrow',
-      'Stay off of all social media for the rest of today',
-      'Stay off your phone until you finish one of your tasks that you came here to complete',
-      'Start working on a business idea you\'ve had, or try to come up with one to start working on',
-      'Physically write out your plan towards a goal of yours',
-      'Draw out an idea that you\'ve had recently for a product or service',
-      'Set a new goal for yourself',
-      'Make plans for how you will achieve your current goals'
+      'Stay off all social media until your current task is complete.',
+      'Do not touch your phone until you\'ve finished at least one planned task.',
+      'Start working on a business idea you\'ve been sitting on—or draft a brand new one.',
+      'Write out your plan towards a meaningful goal of yours.',
+      'Sketch out a product or service idea you\'ve been thinking about.',
+      'Define a new goal for yourself in writing—be specific.'
     ],
-    'Fitness Class (Yoga, HIIT, Spin, Pilates)': [
-      'Sit still for 5 minutes after class with your eyes closed and take a moment for yourself',
-      'Hold your hardest pose 10 seconds longer than you want to',
-      'Ask your instructor what they think you should focus on most',
-      'Take 10 minutes after class to practice your hardest pose',
-      'Compliment someone in class on their practice',
-      'Set a new goal for your practice',
-      'Plan out how you should achieve your current goals for your practice',
-      'Attend a class that you are intimidated by or generally avoid'
+    'Fitness Class (Yoga, Spin, Pilates, HIIT)': [
+      'After class, sit with your eyes closed for 5 minutes and be in the moment.',
+      'Choose your most difficult pose and hold it 10 seconds longer than you want to.',
+      'Ask your instructor to identify one area where you can improve.',
+      'Spend 10 minutes post-class practicing the pose you struggle with most.',
+      'Push yourself a little harder than usual in today\'s class.',
+      'Genuinely compliment a classmate\'s effort or progress today.',
+      'Set a new goal for your practice, workout or fitness journey.',
+      'Create a clear plan to achieve your current fitness goal.',
+      'Attend a class you\'ve been hesitant to try due to discomfort or fear.'
     ],
     'Martial Arts Gym': [
-      'Stay after class and drill what you learned today',
-      'Roll with at least two higher belts today',
-      'Show up to the next class 15 minutes early',
-      'Thank all of your coaches after class today',
-      'Ask your trainers what you can be doing better with your technique',
-      'Ask to roll with your coach',
-      'Commit to a goal in your training and write down the steps you\'ll take to reach it'
+      'Stay after class to drill today\'s techniques for at least 10 minutes.',
+      'Roll with two higher belts today.',
+      'Thank each of your coaches after class today.',
+      'Ask a coach for direct feedback on where you can improve technically.',
+      'Ask to roll with your coach today.',
+      'Set a goal for yourself and write down steps on how you plan to reach it.'
     ],
-    'Movies/Mall/Bowling/Arcade/Theme Park': [
-      'Sit and take in nature and the sounds around you for 15 minutes, without checking your phone',
-      'Pay a stranger a genuine compliment',
-      'Throw away a couple pieces of trash, even if they\'re not yours',
+    'Movies / Mall / Bowling / Arcade / Theme Park': [
+      'Sit in silence for 15 minutes in a public space—no phone, no distractions. Just observe.',
+      'Offer a stranger a genuine compliment that takes effort to say.',
+      'Pick up and throw away two pieces of trash, even if they\'re not yours.',
       'Strike up a meaningful conversation with someone who is clearly outside your demographic',
-      'Exist without distractions for 30 minutes, no phone, no music, just observe your environment or enjoy nature',
-      'Give up your personal comfort: pick up a piece of trash, give up your seat, help someone who looks like they can use it.',
-      'Hold the door for 3 different people today'
+      'Spend 30 minutes without any form of digital input. Just exist.',
+      'Hold the door open for three different people today'
     ],
     'Office': [
-      'Do the hardest task on your list first thing today',
-      'Turn off your notifications for 1 hour and do deep work',
-      'Thank someone for their help this week, in person',
-      'Plan tomorrow\'s 3 \'must-do\' tasks before leaving the office today',
-      'Avoid drinking coffee today',
-      'Write down 1 way that you can improve in the office and what you can do to implement it'
+      'Begin your day by tackling the task you\'ve been avoiding most.',
+      'Disable all notifications and commit to one hour of deep, uninterrupted work.',
+      'Thank someone face-to-face for their contribution to your week.',
+      'Write down the three critical tasks for tomorrow before leaving today.',
+      'Avoid drinking any caffeine today.',
+      'Identify one habit or action that would make you more effective at work—and take the first step toward it today.'
     ],
     'Weightlifting Gym': [
-      'Spend 10 minutes stretching after your workout',
-      'Take a cold shower today',
-      'Avoid looking at your phone this workout',
-      'Complete an extra set on each workout today',
-      'Do 10 minutes on the stair master before or after your workout today',
-      'Do a 10 minute light jog on the treadmill before or after your workout',
-      'Rep your next exercise until failure, real failure',
-      'Commit to a goal in the gym and write down steps you\'ll take to achieve it',
-      'Workout with no music today'
+      'Spend at least 10 minutes stretching post-workout.',
+      'Take a cold shower after your workout.',
+      'Stay off your phone this entire workout',
+      'Add one set to every workout today.',
+      'Begin or end your workout with 10 minutes on the stairmaster—no excuses.',
+      'Add a 10-minute light jog to your routine today—before or after lifting.',
+      'Complete your next workout to failure, real failure.',
+      'Write down a specific fitness goal and the exact plan you\'ll follow to reach it.'
     ]
   };
 
@@ -1821,11 +1816,11 @@ function AppContent() {
                     key={`location-${shakeTrigger}`}
                   >
                     <option value="">Select location</option>
-                    <option value="Beach/Park">Beach/Park</option>
-                    <option value="Coffee Shop/Library">Coffee Shop/Library</option>
-                    <option value="Fitness Class (Yoga, HIIT, Spin, Pilates)">Fitness Class (Yoga, HIIT, Spin, Pilates)</option>
+                    <option value="Beach / Park / Public Spaces">Beach / Park / Public Spaces</option>
+                    <option value="Coffee Shop / Library">Coffee Shop / Library</option>
+                    <option value="Fitness Class (Yoga, Spin, Pilates, HIIT)">Fitness Class (Yoga, Spin, Pilates, HIIT)</option>
                     <option value="Martial Arts Gym">Martial Arts Gym</option>
-                    <option value="Movies/Mall/Bowling/Arcade/Theme Park">Movies/Mall/Bowling/Arcade/Theme Park</option>
+                    <option value="Movies / Mall / Bowling / Arcade / Theme Park">Movies / Mall / Bowling / Arcade / Theme Park</option>
                     <option value="Office">Office</option>
                     <option value="Weightlifting Gym">Weightlifting Gym</option>
                   </select>
