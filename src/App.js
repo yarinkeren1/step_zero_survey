@@ -576,8 +576,9 @@ function AppContent() {
     const totalSteps = 10;
     let step = 0;
 
-    if (showThankYou && thankYouType !== 'not-interested') step = totalSteps;
-    else if (showChallengeText) step = 3;
+    if (showThankYou) {
+      step = thankYouType !== 'not-interested' ? totalSteps : 0;
+    } else if (showChallengeText) step = 3;
     else if (showChallengeAssignment || assignedChallenge) step = 2;
     else if (showLocationSelection) step = 1;
     else if (currentQuestion === 1) step = 4;
@@ -1219,9 +1220,11 @@ function AppContent() {
             <div className="nav-indicator" style={indicatorStyle}></div>
           </div>
         </div>
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
-        </div>
+        {thankYouType !== 'not-interested' && (
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
+          </div>
+        )}
         <div className="thank-you-page">
           {thankYouType === 'not-interested' && (
             <>
@@ -1789,7 +1792,7 @@ function AppContent() {
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
           </div>
 
-          {!showChallengeAssignment && !showChallengeText && (
+          {!showChallengeAssignment && (
             <button className="survey-exit-btn fade-in" onClick={goBackToMain}>
               ×
             </button>

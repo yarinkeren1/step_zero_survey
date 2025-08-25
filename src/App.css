@@ -283,6 +283,7 @@ body {
 /* Challenge Assignment */
 .challenge-assignment {
   animation: fadeInOut 3.5s ease;
+  animation-fill-mode: forwards;
   font-size: 3.125rem;
   font-weight: bold;
   letter-spacing: 2px;
