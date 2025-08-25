@@ -438,9 +438,11 @@ function AppContent() {
     }
 
     setShowSurvey(true);
-    setShowLocationSelection(true);
+    // Delay showing the first question so the progress bar can animate
+    setShowLocationSelection(false);
     setShowChallengeAssignment(false);
     setSurveyHidden(false);
+    setTimeout(() => setShowLocationSelection(true), 50);
   };
 
   const showNotInterested = () => {
@@ -799,14 +801,14 @@ function AppContent() {
       setShowChallengeAssignment(true);
       setChallengeFadeIn(true);
       
-      // Auto-fade out after 2.25 seconds (like the old intro)
+      // Auto-fade out after 3.5 seconds so users can read the intro
       const timer = setTimeout(() => {
         setChallengeFadeIn(false);
         setTimeout(() => {
           setShowChallengeAssignment(false);
           setShowChallengeText(true);
         }, 300);
-      }, 2250);
+      }, 3500);
       
       setChallengeAssignmentTimer(timer);
     }, 300);
