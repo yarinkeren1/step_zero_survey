@@ -1631,9 +1631,9 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(4, 'a')}
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('4a')}
                 >
                   Next
                 </button>
@@ -1647,21 +1647,32 @@ function AppContent() {
               <div className="options-container">
                 <div className={`options ${errors.question4b ? 'shake' : ''}`} key={`question4b-${shakeTrigger}`}>
                   <div
-                    className={`option ${answers.question4b === 'I was too nervous' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I was too nervous')}
+codex/revamp-challenge-survey-flow-and-ui
+                    className={`option ${answers.question4b === "I'm too nervous" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I'm too nervous")}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I was too nervous</div>
+                    <div className="option-text">I'm too nervous</div>
                   </div>
                   <div
-                    className={`option ${answers.question4b === 'I didn\'t have time' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I didn\'t have time')}
+                    className={`option ${answers.question4b === "I don't have time" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I don't have time")}
+
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I didn't have time</div>
+                    <div className="option-text">I don't have time</div>
                   </div>
                   <div
-                    className={`option ${answers.question4b === 'I\'m not interested' ? 'selected' : ''}`}
+codex/revamp-challenge-survey-flow-and-ui
+                    className={`option ${answers.question4b === "I don't think it would benefit me" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I don't think it would benefit me")}
+                  >
+                    <div className="radio-circle"></div>
+                    <div className="option-text">I don't think it would benefit me</div>
+                  </div>
+                  <div
+                    className={`option ${answers.question4b === "I'm not interested" ? 'selected' : ''}`}
+
                     onClick={() => selectOption('question4b', "I'm not interested")}
                   >
                     <div className="radio-circle"></div>
@@ -1681,9 +1692,9 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(4, 'b')}
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('4b')}
                 >
                   Next
                 </button>

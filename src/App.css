@@ -292,7 +292,9 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
 }
 
 /* Challenge Text Screen */
