@@ -510,9 +510,11 @@ function AppContent() {
 
   const goBack = () => {
     if (currentQuestion === 1) {
-      setShowChallengeAssignment(true);
-      setChallengeFadeIn(true);
+      setShowChallengeText(true);
+      setShowChallengeAssignment(false);
+      setChallengeFadeIn(false);
       setCurrentQuestion(0);
+      localStorage.setItem('stepZeroCurrentQuestion', 'challenge');
       navigate('/survey/location');
     } else if (currentQuestion === 2) {
       setCurrentQuestion(1);
