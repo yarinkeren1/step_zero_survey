@@ -1647,6 +1647,7 @@ function AppContent() {
               <div className="options-container">
                 <div className={`options ${errors.question4b ? 'shake' : ''}`} key={`question4b-${shakeTrigger}`}>
                   <div
+codex/revamp-challenge-survey-flow-and-ui
                     className={`option ${answers.question4b === "I'm too nervous" ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', "I'm too nervous")}
                   >
@@ -1656,11 +1657,13 @@ function AppContent() {
                   <div
                     className={`option ${answers.question4b === "I don't have time" ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', "I don't have time")}
+
                   >
                     <div className="radio-circle"></div>
                     <div className="option-text">I don't have time</div>
                   </div>
                   <div
+codex/revamp-challenge-survey-flow-and-ui
                     className={`option ${answers.question4b === "I don't think it would benefit me" ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', "I don't think it would benefit me")}
                   >
@@ -1669,6 +1672,7 @@ function AppContent() {
                   </div>
                   <div
                     className={`option ${answers.question4b === "I'm not interested" ? 'selected' : ''}`}
+
                     onClick={() => selectOption('question4b', "I'm not interested")}
                   >
                     <div className="radio-circle"></div>
