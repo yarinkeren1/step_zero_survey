@@ -1589,6 +1589,8 @@ function AppContent() {
                   <option value="Exercise Studio (Yoga, Pilates, Spin, HIIT)">Exercise Studio (Yoga, Pilates, Spin, HIIT)</option>
                   <option value="Library">Library</option>
                   <option value="Mall">Mall</option>
+                  <option value="Martial Arts Gym">Martial Arts Gym</option>
+                  <option value="Weightlifting Gym">Weightlifting Gym</option>
                   <option value="Other">Other</option>
                 </select>
                 
