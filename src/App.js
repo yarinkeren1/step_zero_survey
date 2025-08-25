@@ -305,6 +305,12 @@ function AppContent() {
       setSelectedFile(null);
       setShowCheckmark(false);
       setErrors({});
+
+      // Clear any stored progress when returning home
+      localStorage.removeItem('stepZeroLocation');
+      localStorage.removeItem('stepZeroChallenge');
+      localStorage.removeItem('stepZeroAnswers');
+      localStorage.removeItem('stepZeroCurrentQuestion');
     } else if (path.startsWith('/thank-you/')) {
       // Thank you page
       const thankYouTypeFromPath = path.split('/')[2];
@@ -388,14 +394,32 @@ function AppContent() {
 
 
   const startSurvey = () => {
+    // Reset any previously saved progress
+    setCurrentQuestion(0);
+    setSelectedLocation('');
+    setAssignedChallenge('');
+    setChallengeCompleted(null);
+    setAnswers({});
+    setShowOtherSection(false);
+    setShowOtherSection5a(false);
+    setShowEmailSection(false);
+    setShowMediaSection(false);
+    setSelectedFile(null);
+    setShowCheckmark(false);
+    setErrors({});
+    localStorage.removeItem('stepZeroLocation');
+    localStorage.removeItem('stepZeroChallenge');
+    localStorage.removeItem('stepZeroAnswers');
+    localStorage.removeItem('stepZeroCurrentQuestion');
+
     // Reset final question submitted state
     setFinalQuestionSubmitted(false);
-    
+
     // Check if survey was completed and if enough time has passed (1 minute)
     const surveyCompletionTime = localStorage.getItem('surveyCompletionTime');
     const currentTime = Date.now();
     const oneMinute = 60 * 1000; // 60 seconds in milliseconds
-    
+
     if (surveyCompleted && surveyCompletionTime && (currentTime - parseInt(surveyCompletionTime)) < oneMinute) {
       // If survey was completed less than 1 minute ago, show the appropriate thank you page
       // But only if it wasn't completed via "Not Interested" - in that case, start fresh
@@ -406,18 +430,16 @@ function AppContent() {
         return;
       }
     }
-    
+
     // Clear any existing timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    
+
     setShowSurvey(true);
     setShowLocationSelection(true);
     setShowChallengeAssignment(false);
-    setSelectedLocation('');
-    setAssignedChallenge('');
     setSurveyHidden(false);
   };
 
