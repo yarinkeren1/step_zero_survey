@@ -282,11 +282,17 @@ body {
 
 /* Challenge Assignment */
 .challenge-assignment {
-  animation: fadeInOut 2.25s ease;
+  animation: fadeInOut 3.5s ease;
+  animation-fill-mode: forwards;
   font-size: 3.125rem;
   font-weight: bold;
   letter-spacing: 2px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
 }
 
 /* Challenge Text Screen */
