@@ -691,7 +691,7 @@ function AppContent() {
             question5b_reminder: answers.question5b || '',
             question5b_email: answers['answer5b-email'] || '',
             question6_consent: answers.question6 || '',
-            question7_age: answers.age || '',
+            question7_age: answers.age ? parseInt(answers.age, 10) : null,
             question8_gender: answers.gender || '',
             terms_consent: termsConsent,
             completion_time: new Date().toISOString(),
