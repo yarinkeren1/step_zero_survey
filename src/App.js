@@ -420,26 +420,33 @@ function AppContent() {
   };
 
   const showNotInterested = () => {
-    // If we're in the challenge text screen, go back to location selection
     if (showChallengeText) {
-      setShowChallengeText(false);
-      setShowLocationSelection(true);
+      setPreviousPage('challenge');
+    } else {
+      setPreviousPage('hero');
+    }
+
+    setShowChallengeText(false);
+    setShowSurvey(false);
+    setShowThankYou(true);
+    setThankYouType('not-interested');
+    setLastThankYouType('not-interested');
+    setSurveyCompleted(true);
+    localStorage.setItem('surveyCompleted', 'true');
+    localStorage.setItem('lastThankYouType', 'not-interested');
+    localStorage.setItem('surveyCompletionTime', Date.now().toString());
+    navigate('/thank-you/not-interested');
+  };
+
+  const handleNotInterestedBack = () => {
+    if (previousPage === 'challenge') {
+      setShowThankYou(false);
       setShowSurvey(true);
-      setCurrentQuestion(0);
-      setSelectedLocation('');
-      setAssignedChallenge('');
+      setShowChallengeText(true);
+      setPreviousPage('');
       navigate('/survey/location');
     } else {
-      // Otherwise show the "not-interested" thank you page
-      setShowSurvey(false);
-      setShowThankYou(true);
-      setThankYouType('not-interested');
-      setLastThankYouType('not-interested');
-      setSurveyCompleted(true);
-      localStorage.setItem('surveyCompleted', 'true');
-      localStorage.setItem('lastThankYouType', 'not-interested');
-      localStorage.setItem('surveyCompletionTime', Date.now().toString());
-      navigate('/thank-you/not-interested');
+      goBackToMain();
     }
   };
 
@@ -536,25 +543,33 @@ function AppContent() {
   };
 
   const updateProgress = () => {
-    let progress = 0;
-    if (showThankYou && thankYouType !== 'not-interested') progress = 100;
-    else if (showLocationSelection) progress = 10;
-    else if (showChallengeAssignment) progress = 20;
-    else if (showChallengeText) progress = 25;
-    else if (currentQuestion === 1) progress = 30;
-    else if (currentQuestion === 3) progress = 40;
-    else if (currentQuestion === '4a') progress = 50;
-    else if (currentQuestion === '5a') progress = 60;
-    else if (currentQuestion === '5c') progress = 70;
-    else if (currentQuestion === '4b') progress = 50;
-    else if (currentQuestion === '4b-other') progress = 55;
-    else if (currentQuestion === '5b') progress = 60;
-    else if (currentQuestion === '5b-email') progress = 65;
-    else if (currentQuestion === 6) progress = 75;
-    else if (currentQuestion === 7) progress = 85;
-    else if (currentQuestion === 8) progress = 100;
-    else if (showSurvey && !showLocationSelection && !showChallengeAssignment && !showChallengeText && currentQuestion === 0) progress = 5;
-    return progress;
+    const totalSteps = 10;
+    let step = 0;
+
+    if (showThankYou && thankYouType !== 'not-interested') step = totalSteps;
+    else if (showLocationSelection) step = 1;
+    else if (showChallengeAssignment) step = 2;
+    else if (showChallengeText) step = 3;
+    else if (currentQuestion === 1) step = 4;
+    else if (currentQuestion === 3) step = 5;
+    else if (
+      currentQuestion === '4a' ||
+      currentQuestion === '4b' ||
+      currentQuestion === '4b-other'
+    )
+      step = 6;
+    else if (
+      currentQuestion === '5a' ||
+      currentQuestion === '5c' ||
+      currentQuestion === '5b' ||
+      currentQuestion === '5b-email'
+    )
+      step = 7;
+    else if (currentQuestion === 6) step = 8;
+    else if (currentQuestion === 7) step = 9;
+    else if (currentQuestion === 8) step = 10;
+
+    return (step / totalSteps) * 100;
   };
 
   const validateAndContinue = (questionNumber, suffix = '') => {
@@ -1172,7 +1187,7 @@ function AppContent() {
             <>
               <h2>Got it.</h2>
               <p>Be sure to keep up with our socials in case you change your mind!</p>
-              <button className="not-interested-btn" onClick={goBackToMain} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
+              <button className="not-interested-btn" onClick={handleNotInterestedBack} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
                 Go Back
               </button>
               <button className="not-interested-btn" onClick={() => { setPreviousPage('not-interested'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '5px', marginBottom: '7.5px' }}>
@@ -1786,9 +1801,6 @@ function AppContent() {
               <div className="question challenge-text-screen fade-in">
                 <div className="challenge-text">
                   {assignedChallenge}
-                </div>
-                <div className="challenge-instructions">
-                  <p>Complete this challenge, then return to this page to continue the survey.</p>
                 </div>
                 <div className="button-container">
                   <button className="back-btn small" onClick={showNotInterested}>
