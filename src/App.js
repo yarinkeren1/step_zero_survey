@@ -1480,9 +1480,11 @@ function AppContent() {
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
           </div>
 
-            <button className="survey-exit-btn fade-in" onClick={goBackToMain}>
-              ×
-            </button>
+            {!showIntro && (
+              <button className="survey-exit-btn fade-in" onClick={goBackToMain}>
+                ×
+              </button>
+            )}
 
           <div className="survey">
             {showIntro && (
@@ -1647,7 +1649,6 @@ function AppContent() {
               <div className="options-container">
                 <div className={`options ${errors.question4b ? 'shake' : ''}`} key={`question4b-${shakeTrigger}`}>
                   <div
-codex/revamp-challenge-survey-flow-and-ui
                     className={`option ${answers.question4b === "I'm too nervous" ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', "I'm too nervous")}
                   >
@@ -1663,7 +1664,6 @@ codex/revamp-challenge-survey-flow-and-ui
                     <div className="option-text">I don't have time</div>
                   </div>
                   <div
-codex/revamp-challenge-survey-flow-and-ui
                     className={`option ${answers.question4b === "I don't think it would benefit me" ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', "I don't think it would benefit me")}
                   >
