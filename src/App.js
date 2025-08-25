@@ -250,11 +250,13 @@ function AppContent() {
         if (savedAnswers) {
           setAnswers(JSON.parse(savedAnswers));
         }
-        if (savedCurrentQuestion) {
+        if (savedCurrentQuestion && savedCurrentQuestion !== 'challenge') {
           setCurrentQuestion(parseInt(savedCurrentQuestion));
         }
-        // Show challenge assignment screen if user was in progress
-        if (savedCurrentQuestion && parseInt(savedCurrentQuestion) === 0) {
+        if (savedCurrentQuestion === 'challenge') {
+          setShowSurvey(true);
+          setShowChallengeText(true);
+        } else if (savedCurrentQuestion && parseInt(savedCurrentQuestion) === 0) {
           setShowSurvey(true);
           setShowChallengeAssignment(true);
           setChallengeFadeIn(true);
@@ -443,7 +445,9 @@ function AppContent() {
       setShowThankYou(false);
       setShowSurvey(true);
       setShowChallengeText(true);
+      setShowChallengeAssignment(false);
       setPreviousPage('');
+      localStorage.setItem('stepZeroCurrentQuestion', 'challenge');
       navigate('/survey/location');
     } else {
       goBackToMain();
@@ -547,9 +551,9 @@ function AppContent() {
     let step = 0;
 
     if (showThankYou && thankYouType !== 'not-interested') step = totalSteps;
-    else if (showLocationSelection) step = 1;
-    else if (showChallengeAssignment) step = 2;
     else if (showChallengeText) step = 3;
+    else if (showChallengeAssignment || assignedChallenge) step = 2;
+    else if (showLocationSelection) step = 1;
     else if (currentQuestion === 1) step = 4;
     else if (currentQuestion === 3) step = 5;
     else if (
@@ -785,6 +789,16 @@ function AppContent() {
   };
 
 
+
+  const backToLocation = () => {
+    setShowChallengeText(false);
+    setShowLocationSelection(true);
+    setSelectedLocation('');
+    setAssignedChallenge('');
+    localStorage.removeItem('stepZeroLocation');
+    localStorage.removeItem('stepZeroChallenge');
+    localStorage.removeItem('stepZeroCurrentQuestion');
+  };
 
   const continueToSurvey = () => {
     setShowChallengeText(false);
@@ -1749,8 +1763,8 @@ function AppContent() {
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
           </div>
 
-          {(currentQuestion > 0 || typeof currentQuestion === 'string') && (
-            <button className="survey-exit-btn" onClick={goBackToMain}>
+          {!showChallengeAssignment && !showChallengeText && (
+            <button className="survey-exit-btn fade-in" onClick={goBackToMain}>
               ×
             </button>
           )}
@@ -1803,6 +1817,9 @@ function AppContent() {
                   {assignedChallenge}
                 </div>
                 <div className="button-container">
+                  <button className="back-btn small" onClick={backToLocation}>
+                    Back
+                  </button>
                   <button className="back-btn small" onClick={showNotInterested}>
                     Not Interested
                   </button>
