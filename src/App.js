@@ -1347,11 +1347,11 @@ function AppContent() {
           </div>
         </div>
       </div>
-    </div>
-    {showCookieBanner && <CookieBanner />}
-  </>
+      {showCookieBanner && <CookieBanner />}
+    </>
   );
-  }
+}
+main
 
   if (showPrivacy) {
     return (
@@ -2404,8 +2404,8 @@ function AppContent() {
                 </div>
               )}
             </div>
-          )}
-
+          </div>
+main
           <div className="bottom-footer">
             <div className="copyright-footer">
               <span>© Step Zero, Inc 2025</span>
