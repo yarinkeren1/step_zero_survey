@@ -71,6 +71,7 @@ function AppContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalQuestionSubmitted, setFinalQuestionSubmitted] = useState(false);
   const [showSubmitted, setShowSubmitted] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
   const [surveyHidden, setSurveyHidden] = useState(false);
 
   const homeBtnRef = useRef(null);
@@ -209,6 +210,11 @@ function AppContent() {
   useEffect(() => {
     const path = location.pathname;
     
+    // Don't interfere with survey flow - preserve answers during survey navigation
+    if (path.startsWith('/survey/question/')) {
+      return;
+    }
+    
     if (path === '/') {
       // Home page
       setShowSurvey(false);
@@ -274,7 +280,6 @@ function AppContent() {
       setShowCheckmark(false);
       setErrors({});
     }
-    // Note: We don't handle /survey/question/* routes here to avoid interfering with survey flow
   }, [location.pathname]);
 
 
@@ -621,7 +626,10 @@ function AppContent() {
     submittedTimerRef.current = setTimeout(async () => {
       setShowSubmitted(false);
       
-      // Wait for fade out animation to complete, then show thank you page
+      // Show loading page
+      setShowLoading(true);
+      
+      // Wait for fade out animation to complete, then process submission
       setTimeout(async () => {
         try {
           // Upload file to Supabase Storage if consent was given and file exists
@@ -666,6 +674,11 @@ function AppContent() {
             });
           }
 
+          // Debug: Log the entire answers object
+          console.log('Complete answers object:', JSON.stringify(answers, null, 2));
+          console.log('Age value from answers:', answers.age);
+          console.log('Age type:', typeof answers.age);
+
           // Prepare survey data for Supabase
           const surveyData = {
             question1_challenge: answers.question1 || '',
@@ -688,6 +701,10 @@ function AppContent() {
             media_file_url: fileUrl,
             media_file_name: selectedFile ? selectedFile.name : null
           };
+
+          console.log('Survey data prepared:', JSON.stringify(surveyData, null, 2));
+
+
 
           // Send data to Supabase
           console.log('Attempting to save survey data to Supabase...');
@@ -727,6 +744,7 @@ function AppContent() {
             }
           }
 
+          setShowLoading(false);
           setShowThankYou(true);
           const type = answers.question3 === 'Yes' ? 'completed' : 'not-completed';
           setThankYouType(type);
@@ -741,6 +759,7 @@ function AppContent() {
         } catch (error) {
           console.error('Error in completeSurvey:', error);
           // Continue with survey completion even if save fails
+          setShowLoading(false);
           setShowThankYou(true);
           const type = answers.question3 === 'Yes' ? 'completed' : 'not-completed';
           setThankYouType(type);
@@ -812,13 +831,79 @@ function AppContent() {
     });
   };
 
+  // Function to compress image for email backup
+  const compressImageForEmail = (file, maxSizeKB = 40) => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) {
+        // For non-image files, just return the original file
+        resolve(file);
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Calculate new dimensions (max 800px width/height)
+        const maxDimension = 800;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxDimension) {
+            height = (height * maxDimension) / width;
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try different quality levels to get under the size limit
+        let quality = 0.8;
+        let dataUrl;
+        
+        do {
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+          quality -= 0.1;
+        } while (dataUrl.length > maxSizeKB * 1024 && quality > 0.1);
+
+        // Convert back to file
+        const byteString = atob(dataUrl.split(',')[1]);
+        const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        
+        const compressedFile = new File([ab], file.name, { type: mimeString });
+        resolve(compressedFile);
+      };
+
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // Function to send email backup
   const sendEmailBackup = async (surveyData) => {
     try {
       console.log('Sending email backup...');
       
-      // Convert file to base64 if it exists (limit to 5MB for email)
+      // Process file for email backup with compression
       let fileBase64 = null;
+      let processedFile = selectedFile;
+      
       if (selectedFile) {
         console.log('Processing file for email backup:', {
           name: selectedFile.name,
@@ -826,16 +911,32 @@ function AppContent() {
           type: selectedFile.type
         });
         
-        const maxEmailSize = 5 * 1024 * 1024; // 5MB limit for email
-        if (selectedFile.size <= maxEmailSize) {
+        // Compress image files to reduce size
+        if (selectedFile.type.startsWith('image/')) {
           try {
-            fileBase64 = await fileToBase64(selectedFile);
+            processedFile = await compressImageForEmail(selectedFile, 40); // 40KB limit
+            console.log('File compressed for email:', {
+              originalSize: selectedFile.size,
+              compressedSize: processedFile.size,
+              reduction: `${((1 - processedFile.size / selectedFile.size) * 100).toFixed(1)}%`
+            });
+          } catch (error) {
+            console.error('Error compressing file:', error);
+            processedFile = selectedFile; // Use original if compression fails
+          }
+        }
+        
+        // Check if file is small enough for email (40KB limit for EmailJS)
+        const maxEmailSize = 40 * 1024; // 40KB limit
+        if (processedFile.size <= maxEmailSize) {
+          try {
+            fileBase64 = await fileToBase64(processedFile);
             console.log('File converted to base64 successfully, length:', fileBase64.length);
           } catch (error) {
             console.error('Error converting file to base64:', error);
           }
         } else {
-          console.log('File too large for email backup, skipping file data');
+          console.log('File still too large for email backup, sending metadata only');
         }
       } else {
         console.log('No file selected for email backup');
@@ -850,7 +951,9 @@ function AppContent() {
         file_type: selectedFile ? selectedFile.type : 'No file',
         file_name: selectedFile ? selectedFile.name : 'No file',
         file_size: selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'No file',
-        file_download_note: selectedFile ? 'File data included in email. You can save it by copying the base64 data and converting it back to a file.' : ''
+        file_compressed: processedFile && processedFile !== selectedFile ? 'Yes (compressed for email)' : 'No',
+        file_compressed_size: processedFile && processedFile !== selectedFile ? `${(processedFile.size / 1024).toFixed(1)} KB` : 'N/A',
+        file_download_note: fileBase64 ? 'Compressed file data included in email. You can save it by copying the base64 data and converting it back to a file.' : 'File too large for email backup. Check Supabase storage for full file.'
       };
 
       console.log('Email data prepared:', {
@@ -891,7 +994,13 @@ function AppContent() {
   };
 
   const handleInputChange = (questionId, value) => {
-    setAnswers({ ...answers, [questionId]: value });
+    console.log('handleInputChange called with:', { questionId, value });
+    console.log('Previous answers state:', JSON.stringify(answers, null, 2));
+    setAnswers(prevAnswers => {
+      const newAnswers = { ...prevAnswers, [questionId]: value };
+      console.log('New answers state:', JSON.stringify(newAnswers, null, 2));
+      return newAnswers;
+    });
     if (errors[questionId]) {
       setErrors({ ...errors, [questionId]: false });
     }
@@ -1474,6 +1583,35 @@ function AppContent() {
         </div>
       )}
 
+      {showLoading && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="gear-container">
+              <div className="gear gear-large">
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+              </div>
+              <div className="gear gear-small">
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+                <div className="gear-teeth"></div>
+              </div>
+            </div>
+            <h3>PROCESSING YOUR RESPONSE</h3>
+            <p>Connecting to database...</p>
+          </div>
+        </div>
+      )}
+
       {showSurvey && !showSubmitted && !showThankYou && !surveyHidden && (
         <>
           <div className="progress-bar">
@@ -1819,9 +1957,13 @@ function AppContent() {
                     value={answers.age || ''}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Only allow numbers and limit to 3 digits
-                      if (value === '' || (/^\d{1,3}$/.test(value) && parseInt(value) >= 1 && parseInt(value) <= 120)) {
+                      console.log('Age input onChange triggered with value:', value);
+                      // Allow empty string or numbers only
+                      if (value === '' || /^\d+$/.test(value)) {
+                        console.log('Calling handleInputChange with age:', value);
                         handleInputChange('age', value);
+                      } else {
+                        console.log('Age input validation failed for value:', value);
                       }
                     }}
                     min="1"

@@ -355,6 +355,114 @@ body {
   text-transform: uppercase;
 }
 
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.loading-content h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 20px 0 10px 0;
+  text-transform: uppercase;
+}
+
+.loading-content p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Gear Container */
+.gear-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px auto;
+}
+
+/* Large Gear */
+.gear.gear-large {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: spin 3s linear infinite;
+}
+
+/* Small Gear */
+.gear.gear-small {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: spin 2s linear infinite reverse;
+}
+
+/* Gear Teeth */
+.gear-teeth {
+  position: absolute;
+  width: 8px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.gear.gear-large .gear-teeth:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
+.gear.gear-large .gear-teeth:nth-child(2) { transform: translateX(-50%) rotate(45deg); }
+.gear.gear-large .gear-teeth:nth-child(3) { transform: translateX(-50%) rotate(90deg); }
+.gear.gear-large .gear-teeth:nth-child(4) { transform: translateX(-50%) rotate(135deg); }
+.gear.gear-large .gear-teeth:nth-child(5) { transform: translateX(-50%) rotate(180deg); }
+.gear.gear-large .gear-teeth:nth-child(6) { transform: translateX(-50%) rotate(225deg); }
+.gear.gear-large .gear-teeth:nth-child(7) { transform: translateX(-50%) rotate(270deg); }
+.gear.gear-large .gear-teeth:nth-child(8) { transform: translateX(-50%) rotate(315deg); }
+
+.gear.gear-small .gear-teeth:nth-child(1) { transform: translateX(-50%) rotate(0deg); }
+.gear.gear-small .gear-teeth:nth-child(2) { transform: translateX(-50%) rotate(60deg); }
+.gear.gear-small .gear-teeth:nth-child(3) { transform: translateX(-50%) rotate(120deg); }
+.gear.gear-small .gear-teeth:nth-child(4) { transform: translateX(-50%) rotate(180deg); }
+.gear.gear-small .gear-teeth:nth-child(5) { transform: translateX(-50%) rotate(240deg); }
+.gear.gear-small .gear-teeth:nth-child(6) { transform: translateX(-50%) rotate(300deg); }
+
+/* Spin Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .question h3 {
   font-size: 1.3rem;
   font-weight: bold;
