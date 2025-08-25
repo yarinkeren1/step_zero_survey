@@ -1347,17 +1347,10 @@ function AppContent() {
           </div>
         </div>
       </div>
-codex/fix-progress-bar-completion-tracking
-    </div>
-    {showCookieBanner && <CookieBanner />}
-  </>
-  );
-  }
       {showCookieBanner && <CookieBanner />}
     </>
   );
 }
-main
 
   if (showPrivacy) {
     return (
@@ -2403,11 +2396,7 @@ main
                 </div>
               )}
             </div>
-          )}
-codex/fix-progress-bar-completion-tracking
-
-
-main
+          </div>
           <div className="bottom-footer">
             <div className="copyright-footer">
               <span>© Step Zero, Inc 2025</span>
