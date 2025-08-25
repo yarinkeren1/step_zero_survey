@@ -48,19 +48,11 @@ function AppContent() {
   const submittedTimerRef = useRef(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSurvey, setShowSurvey] = useState(false);
-  const [showLocationSelection, setShowLocationSelection] = useState(false);
-  const [showChallengeAssignment, setShowChallengeAssignment] = useState(false);
-  const [showChallengeText, setShowChallengeText] = useState(false);
-  const [challengeFadeIn, setChallengeFadeIn] = useState(false);
-  const [challengeAssignmentTimer, setChallengeAssignmentTimer] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [assignedChallenge, setAssignedChallenge] = useState('');
-  const [challengeCompleted, setChallengeCompleted] = useState(null);
+  const [showIntro, setShowIntro] = useState(false);
   const [answers, setAnswers] = useState({});
   const [showThankYou, setShowThankYou] = useState(false);
   const [thankYouType, setThankYouType] = useState('');
   const [showOtherSection, setShowOtherSection] = useState(false);
-  const [showOtherSection5a, setShowOtherSection5a] = useState(false);
   const [showEmailSection, setShowEmailSection] = useState(false);
   const [showMediaSection, setShowMediaSection] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -85,84 +77,7 @@ function AppContent() {
   const aboutBtnRef = useRef(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
-  const totalQuestions = 9;
-
-  // Challenge data structure
-  const challengeSets = {
-    'Beach / Park / Public Spaces': [
-      'Sit in stillness for 15 minutes. No phone, no music—just observe your surroundings.',
-      'Offer a stranger a sincere compliment—make it personal, not performative.',
-      'Pick up and dispose of at least two pieces of litter that aren\'t yours',
-      'Strike up a meaningful conversation with someone who is clearly outside your demographic',
-      'Spend 30 minutes without looking at your phone. Be fully present in your environment.',
-      'Hold the door open for three different people today.'
-    ],
-    'Coffee Shop / Library': [
-      'Map out a realistic step-by-step plan for a goal you\'ve been avoiding.',
-      'Initiate a conversation with someone nearby—ask how their day is going.',
-      'Journal about your day when you get the chance',
-      'Take a cold shower today',
-      'Stay off all social media until your current task is complete.',
-      'Do not touch your phone until you\'ve finished at least one planned task.',
-      'Start working on a business idea you\'ve been sitting on—or draft a brand new one.',
-      'Write out your plan towards a meaningful goal of yours.',
-      'Sketch out a product or service idea you\'ve been thinking about.',
-      'Define a new goal for yourself in writing—be specific.'
-    ],
-    'Fitness Class (Yoga, Spin, Pilates, HIIT)': [
-      'After class, sit with your eyes closed for 5 minutes and be in the moment.',
-      'Choose your most difficult pose and hold it 10 seconds longer than you want to.',
-      'Ask your instructor to identify one area where you can improve.',
-      'Spend 10 minutes post-class practicing the pose you struggle with most.',
-      'Push yourself a little harder than usual in today\'s class.',
-      'Genuinely compliment a classmate\'s effort or progress today.',
-      'Set a new goal for your practice, workout or fitness journey.',
-      'Create a clear plan to achieve your current fitness goal.',
-      'Attend a class you\'ve been hesitant to try due to discomfort or fear.'
-    ],
-    'Martial Arts Gym': [
-      'Stay after class to drill today\'s techniques for at least 10 minutes.',
-      'Roll with two higher belts today.',
-      'Thank each of your coaches after class today.',
-      'Ask a coach for direct feedback on where you can improve technically.',
-      'Ask to roll with your coach today.',
-      'Set a goal for yourself and write down steps on how you plan to reach it.'
-    ],
-    'Movies / Mall / Bowling / Arcade / Theme Park': [
-      'Sit in silence for 15 minutes in a public space—no phone, no distractions. Just observe.',
-      'Offer a stranger a genuine compliment that takes effort to say.',
-      'Pick up and throw away two pieces of trash, even if they\'re not yours.',
-      'Strike up a meaningful conversation with someone who is clearly outside your demographic',
-      'Spend 30 minutes without any form of digital input. Just exist.',
-      'Hold the door open for three different people today'
-    ],
-    'Office': [
-      'Begin your day by tackling the task you\'ve been avoiding most.',
-      'Disable all notifications and commit to one hour of deep, uninterrupted work.',
-      'Thank someone face-to-face for their contribution to your week.',
-      'Write down the three critical tasks for tomorrow before leaving today.',
-      'Avoid drinking any caffeine today.',
-      'Identify one habit or action that would make you more effective at work—and take the first step toward it today.'
-    ],
-    'Weightlifting Gym': [
-      'Spend at least 10 minutes stretching post-workout.',
-      'Take a cold shower after your workout.',
-      'Stay off your phone this entire workout',
-      'Add one set to every workout today.',
-      'Begin or end your workout with 10 minutes on the stairmaster—no excuses.',
-      'Add a 10-minute light jog to your routine today—before or after lifting.',
-      'Complete your next workout to failure, real failure.',
-      'Write down a specific fitness goal and the exact plan you\'ll follow to reach it.'
-    ]
-  };
-
-  // Helper function to get random challenge
-  const getRandomChallenge = (location) => {
-    const challenges = challengeSets[location];
-    if (!challenges) return '';
-    const randomIndex = Math.floor(Math.random() * challenges.length);
-    return challenges[randomIndex];
-  };
+  const totalQuestions = 8;
 
   // EmailJS configuration
   const EMAILJS_PUBLIC_KEY = 'ilfTXIUCME6n3-XCC';
@@ -219,9 +134,7 @@ function AppContent() {
       const savedSurveyCompleted = localStorage.getItem('surveyCompleted');
       const savedLastThankYouType = localStorage.getItem('lastThankYouType');
       
-      // Check for saved survey progress
-      const savedLocation = localStorage.getItem('stepZeroLocation');
-      const savedChallenge = localStorage.getItem('stepZeroChallenge');
+      // Restore saved survey progress
       const savedAnswers = localStorage.getItem('stepZeroAnswers');
       const savedCurrentQuestion = localStorage.getItem('stepZeroCurrentQuestion');
       
@@ -238,23 +151,14 @@ function AppContent() {
         setLastThankYouType(savedLastThankYouType);
       }
 
-      // Restore survey progress if exists
-      if (savedLocation && savedChallenge) {
-        setSelectedLocation(savedLocation);
-        setAssignedChallenge(savedChallenge);
-        if (savedAnswers) {
-          setAnswers(JSON.parse(savedAnswers));
-        }
-        if (savedCurrentQuestion && savedCurrentQuestion !== 'challenge') {
-          setCurrentQuestion(parseInt(savedCurrentQuestion));
-        }
-        if (savedCurrentQuestion === 'challenge') {
+      if (savedAnswers) {
+        setAnswers(JSON.parse(savedAnswers));
+      }
+      if (savedCurrentQuestion) {
+        const q = parseInt(savedCurrentQuestion);
+        if (!isNaN(q) && q > 0) {
+          setCurrentQuestion(q);
           setShowSurvey(true);
-          setShowChallengeText(true);
-        } else if (savedCurrentQuestion && parseInt(savedCurrentQuestion) === 0) {
-          setShowSurvey(true);
-          setShowChallengeAssignment(true);
-          setChallengeFadeIn(true);
         }
       }
     } catch (error) {
@@ -298,11 +202,8 @@ function AppContent() {
       if (submittedTimerRef.current) {
         clearTimeout(submittedTimerRef.current);
       }
-      if (challengeAssignmentTimer) {
-        clearTimeout(challengeAssignmentTimer);
-      }
     };
-  }, [challengeAssignmentTimer]);
+  }, []);
 
   // Handle browser back/forward navigation and route changes
   useEffect(() => {
@@ -316,14 +217,9 @@ function AppContent() {
       setShowPrivacy(false);
       setThankYouType('');
       setCurrentQuestion(0);
-      setShowLocationSelection(false);
-      setShowChallengeAssignment(false);
-      setSelectedLocation('');
-      setAssignedChallenge('');
-      setChallengeCompleted(null);
+      setShowIntro(false);
       setAnswers({});
       setShowOtherSection(false);
-      setShowOtherSection5a(false);
       setShowEmailSection(false);
       setShowMediaSection(false);
       setSelectedFile(null);
@@ -331,8 +227,6 @@ function AppContent() {
       setErrors({});
 
       // Clear any stored progress when returning home
-      localStorage.removeItem('stepZeroLocation');
-      localStorage.removeItem('stepZeroChallenge');
       localStorage.removeItem('stepZeroAnswers');
       localStorage.removeItem('stepZeroCurrentQuestion');
     } else if (path.startsWith('/thank-you/')) {
@@ -344,14 +238,8 @@ function AppContent() {
       setShowAbout(false);
       setShowPrivacy(false);
       setCurrentQuestion(0);
-      setShowLocationSelection(false);
-      setShowChallengeAssignment(false);
-      setSelectedLocation('');
-      setAssignedChallenge('');
-      setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
-      setShowOtherSection5a(false);
       setShowEmailSection(false);
       setShowMediaSection(false);
       setSelectedFile(null);
@@ -364,14 +252,8 @@ function AppContent() {
       setShowThankYou(false);
       setShowPrivacy(false);
       setCurrentQuestion(0);
-      setShowLocationSelection(false);
-      setShowChallengeAssignment(false);
-      setSelectedLocation('');
-      setAssignedChallenge('');
-      setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
-      setShowOtherSection5a(false);
       setShowEmailSection(false);
       setShowMediaSection(false);
       setSelectedFile(null);
@@ -384,14 +266,8 @@ function AppContent() {
       setShowThankYou(false);
       setShowAbout(false);
       setCurrentQuestion(0);
-      setShowLocationSelection(false);
-      setShowChallengeAssignment(false);
-      setSelectedLocation('');
-      setAssignedChallenge('');
-      setChallengeCompleted(null);
       setAnswers({});
       setShowOtherSection(false);
-      setShowOtherSection5a(false);
       setShowEmailSection(false);
       setShowMediaSection(false);
       setSelectedFile(null);
@@ -420,19 +296,13 @@ function AppContent() {
   const startSurvey = () => {
     // Reset any previously saved progress
     setCurrentQuestion(0);
-    setSelectedLocation('');
-    setAssignedChallenge('');
-    setChallengeCompleted(null);
     setAnswers({});
     setShowOtherSection(false);
-    setShowOtherSection5a(false);
     setShowEmailSection(false);
     setShowMediaSection(false);
     setSelectedFile(null);
     setShowCheckmark(false);
     setErrors({});
-    localStorage.removeItem('stepZeroLocation');
-    localStorage.removeItem('stepZeroChallenge');
     localStorage.removeItem('stepZeroAnswers');
     localStorage.removeItem('stepZeroCurrentQuestion');
 
@@ -462,21 +332,17 @@ function AppContent() {
     }
 
     setShowSurvey(true);
-    // Delay showing the first question so the progress bar can animate
-    setShowLocationSelection(false);
-    setShowChallengeAssignment(false);
     setSurveyHidden(false);
-    setTimeout(() => setShowLocationSelection(true), 50);
+    setShowIntro(true);
+    setTimeout(() => {
+      setShowIntro(false);
+      setCurrentQuestion(1);
+      navigate('/survey/question/1');
+    }, 3500);
   };
 
   const showNotInterested = () => {
-    if (showChallengeText) {
-      setPreviousPage('challenge');
-    } else {
-      setPreviousPage('hero');
-    }
-
-    setShowChallengeText(false);
+    setPreviousPage('hero');
     setShowSurvey(false);
     setShowThankYou(true);
     setThankYouType('not-interested');
@@ -489,17 +355,9 @@ function AppContent() {
   };
 
   const handleNotInterestedBack = () => {
-    if (previousPage === 'challenge') {
-      setShowThankYou(false);
-      setShowSurvey(true);
-      setShowChallengeText(true);
-      setShowChallengeAssignment(false);
-      setPreviousPage('');
-      localStorage.setItem('stepZeroCurrentQuestion', 'challenge');
-      navigate('/survey/location');
-    } else {
-      goBackToMain();
-    }
+    setShowThankYou(false);
+    setShowSurvey(false);
+    navigate('/');
   };
 
   const goBackToMain = () => {
@@ -509,26 +367,19 @@ function AppContent() {
     setShowPrivacy(false);
     setThankYouType('');
     setCurrentQuestion(0);
-    setShowLocationSelection(false);
-    setShowChallengeAssignment(false);
-    setSelectedLocation('');
-    setAssignedChallenge('');
-    setChallengeCompleted(null);
+    setShowIntro(false);
     setAnswers({});
     setShowOtherSection(false);
-    setShowOtherSection5a(false);
     setShowEmailSection(false);
     setShowMediaSection(false);
     setSelectedFile(null);
     setShowCheckmark(false);
     setErrors({});
-    
+
     // Clear saved progress
-    localStorage.removeItem('stepZeroLocation');
-    localStorage.removeItem('stepZeroChallenge');
     localStorage.removeItem('stepZeroAnswers');
     localStorage.removeItem('stepZeroCurrentQuestion');
-    
+
     navigate('/');
   };
 
@@ -536,22 +387,17 @@ function AppContent() {
 
   const goBack = () => {
     if (currentQuestion === 1) {
-      setShowChallengeText(true);
-      setShowChallengeAssignment(false);
-      setChallengeFadeIn(false);
+      setShowSurvey(false);
+      setShowIntro(false);
       setCurrentQuestion(0);
-      localStorage.setItem('stepZeroCurrentQuestion', 'challenge');
-      navigate('/survey/location');
+      navigate('/');
     } else if (currentQuestion === 2) {
       setCurrentQuestion(1);
       navigate('/survey/question/1');
     } else if (currentQuestion === 3) {
       setCurrentQuestion(2);
       navigate('/survey/question/2');
-    } else if (currentQuestion === '4a') {
-      setCurrentQuestion(3);
-      navigate('/survey/question/3');
-    } else if (currentQuestion === '4b') {
+    } else if (currentQuestion === '4a' || currentQuestion === '4b') {
       setCurrentQuestion(3);
       navigate('/survey/question/3');
     } else if (currentQuestion === '4b-other') {
@@ -561,9 +407,6 @@ function AppContent() {
     } else if (currentQuestion === '5a') {
       setCurrentQuestion('4a');
       navigate('/survey/question/4a');
-    } else if (currentQuestion === '5c') {
-      setCurrentQuestion('5a');
-      navigate('/survey/question/5a');
     } else if (currentQuestion === '5b') {
       if (showEmailSection) {
         setShowEmailSection(false);
@@ -573,14 +416,10 @@ function AppContent() {
         setCurrentQuestion('4b');
         navigate('/survey/question/4b');
       }
-    } else if (currentQuestion === '5b-email') {
-      setShowEmailSection(false);
-      setCurrentQuestion('5b');
-      navigate('/survey/question/5b');
     } else if (currentQuestion === 6) {
-      if (challengeCompleted === 'Yes') {
-        setCurrentQuestion('5c');
-        navigate('/survey/question/5c');
+      if (answers.question3 === 'Yes') {
+        setCurrentQuestion('5a');
+        navigate('/survey/question/5a');
       } else {
         setCurrentQuestion('5b');
         navigate('/survey/question/5b');
@@ -597,110 +436,73 @@ function AppContent() {
   };
 
   const updateProgress = () => {
-    const totalSteps = 10;
+    const totalSteps = 9;
     let step = 0;
 
-    if (showThankYou) {
-      step = thankYouType !== 'not-interested' ? totalSteps : 0;
-    } else if (showChallengeText) step = 3;
-    else if (showChallengeAssignment || assignedChallenge) step = 2;
-    else if (showLocationSelection) step = 1;
-    else if (currentQuestion === 1) step = 4;
-    else if (currentQuestion === 3) step = 5;
+    if (showThankYou) step = totalSteps;
+    else if (currentQuestion === 1) step = 1;
+    else if (currentQuestion === 2) step = 2;
+    else if (currentQuestion === 3) step = 3;
     else if (
       currentQuestion === '4a' ||
       currentQuestion === '4b' ||
       currentQuestion === '4b-other'
     )
-      step = 6;
-    else if (
-      currentQuestion === '5a' ||
-      currentQuestion === '5c' ||
-      currentQuestion === '5b' ||
-      currentQuestion === '5b-email'
-    )
-      step = 7;
-    else if (currentQuestion === 6) step = 8;
-    else if (currentQuestion === 7) step = 9;
-    else if (currentQuestion === 8) step = 10;
+      step = 4;
+    else if (currentQuestion === '5a' || currentQuestion === '5b') step = 5;
+    else if (currentQuestion === 6) step = 6;
+    else if (currentQuestion === 7) step = 7;
+    else if (currentQuestion === 8) step = 8;
 
     return (step / totalSteps) * 100;
   };
 
-  const validateAndContinue = (questionNumber, suffix = '') => {
-    console.log('validateAndContinue called with:', { questionNumber, suffix, finalQuestionSubmitted, isSubmitting });
-    // Only prevent submission on the final question (question 8)
+  const validateAndContinue = (questionNumber) => {
     if (questionNumber === 8 && finalQuestionSubmitted) {
-      console.log('Returning early due to finalQuestionSubmitted');
       return;
     }
-    
-    const questionId = suffix ? `${questionNumber}${suffix}` : questionNumber;
-    let errorKey = (questionNumber === 1 || questionNumber === 2 || questionId === '4b-other' || questionId === '5b-email') ? `answer${questionId}` : `question${questionId}`;
-    
-    // Special case for 4b Other
-    if (questionId === '4b' && answers.question4b === 'Other') {
-      errorKey = 'answer4b-other';
-    }
-    
-    // Special case for 5a Other
-    if (questionId === '5a' && answers.question5a === 'Other') {
-      errorKey = 'answer5a-other';
-    }
-    
+
     let isValid = false;
+    let errorKey = `question${questionNumber}`;
 
     if (questionNumber === 1) {
-      isValid = answers.question3 !== undefined;
+      const answer = answers.question1 || '';
+      isValid = answer.trim().length > 0;
+      errorKey = 'question1';
     } else if (questionNumber === 2) {
-      const answer = answers[`answer${questionId}`] || '';
-      if (answer === 'Other') {
-        const otherAnswer = answers['answer2-other'] || '';
-        isValid = otherAnswer.trim().length > 0;
-        errorKey = 'answer2-other';
-      } else {
-        isValid = answer.trim().length > 0;
-      }
-      console.log(`Question ${questionId}: answer="${answer}", isValid=${isValid}`);
+      const answer = answers.question2 || '';
+      isValid = answer.trim().length > 0;
+      errorKey = 'question2';
     } else if (questionNumber === 3) {
-      isValid = answers[`question${questionNumber}`] !== undefined;
-    } else if (questionId === '5a') {
-      if (answers.question5a === 'Other') {
-        const answer = answers['answer5a-other'] || '';
-        isValid = answer.trim().length > 0;
-        errorKey = 'answer5a-other';
-      } else {
-        isValid = answers.question5a !== undefined;
-      }
-    } else if (questionId === '4a') {
+      isValid = answers.question3 !== undefined;
+    } else if (questionNumber === '4a') {
       isValid = answers.question4a !== undefined;
-    } else if (questionId === '4b') {
+    } else if (questionNumber === '4b') {
       if (answers.question4b === 'Other') {
-        const answer = answers['answer4b-other'] || '';
-        isValid = answer.trim().length > 0;
+        const other = answers['answer4b-other'] || '';
+        isValid = other.trim().length > 0;
         errorKey = 'answer4b-other';
       } else {
         isValid = answers.question4b !== undefined;
       }
-    } else if (questionId === '5b') {
+    } else if (questionNumber === '5a') {
+      isValid = answers.question5a !== undefined;
+    } else if (questionNumber === '5b') {
       if (answers.question5b === 'Yes') {
-        const answer = answers['answer5b-email'] || '';
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*$/;
-        
-        if (answer.trim().length === 0) {
-          isValid = false;
+        const email = answers['answer5b-email'] || '';
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (email.trim().length === 0) {
           errorKey = 'answer5b-email-empty';
-        } else if (!emailRegex.test(answer)) {
           isValid = false;
+        } else if (!emailRegex.test(email)) {
           errorKey = 'answer5b-email-invalid';
+          isValid = false;
         } else {
           isValid = true;
         }
       } else {
         isValid = answers.question5b !== undefined;
       }
-    } else if (questionId === '5c') {
-      isValid = answers.question5c !== undefined;
     } else if (questionNumber === 6) {
       isValid = answers.question6 !== undefined;
       errorKey = 'question6';
@@ -715,155 +517,51 @@ function AppContent() {
       const hasConsent = termsConsent;
       isValid = hasGender && hasConsent;
       errorKey = hasGender ? 'consent' : 'gender';
-      console.log('Question 8 validation:', { gender, hasGender, hasConsent, isValid, errorKey });
     }
 
     if (isValid) {
-      console.log('Validation passed, proceeding with navigation');
-      // Clear email-specific errors when validation passes
-      if (questionId === '5b') {
-        setErrors({ 
-          ...errors, 
-          'answer5b-email-empty': false,
-          'answer5b-email-invalid': false 
-        });
-      } else {
-        setErrors({ ...errors, [errorKey]: false });
-      }
-      
+      setErrors({ ...errors, [errorKey]: false });
+
       if (questionNumber === 1) {
-        setCurrentQuestion(3);
-        localStorage.setItem('stepZeroCurrentQuestion', '3');
-        navigate('/survey/question/3');
+        setCurrentQuestion(2);
+        navigate('/survey/question/2');
       } else if (questionNumber === 2) {
         setCurrentQuestion(3);
-        localStorage.setItem('stepZeroCurrentQuestion', '3');
         navigate('/survey/question/3');
       } else if (questionNumber === 3) {
-        if (challengeCompleted === 'Yes') {
+        if (answers.question3 === 'Yes') {
           setCurrentQuestion('4a');
-          localStorage.setItem('stepZeroCurrentQuestion', '4a');
           navigate('/survey/question/4a');
         } else {
           setCurrentQuestion('4b');
-          localStorage.setItem('stepZeroCurrentQuestion', '4b');
           navigate('/survey/question/4b');
         }
-      } else if (questionId === '4a') {
+      } else if (questionNumber === '4a') {
         setCurrentQuestion('5a');
-        localStorage.setItem('stepZeroCurrentQuestion', '5a');
         navigate('/survey/question/5a');
-      } else if (questionId === '4b') {
+      } else if (questionNumber === '4b') {
         setCurrentQuestion('5b');
-        localStorage.setItem('stepZeroCurrentQuestion', '5b');
         navigate('/survey/question/5b');
-      } else if (questionId === '4b-other') {
+      } else if (questionNumber === '4b-other') {
         setCurrentQuestion('5b');
-        localStorage.setItem('stepZeroCurrentQuestion', '5b');
         navigate('/survey/question/5b');
-      } else if (questionId === '5a') {
-        setCurrentQuestion('5c');
-        localStorage.setItem('stepZeroCurrentQuestion', '5c');
-        navigate('/survey/question/5c');
-      } else if (questionId === '5c') {
+      } else if (questionNumber === '5a' || questionNumber === '5b') {
         setCurrentQuestion(6);
-        localStorage.setItem('stepZeroCurrentQuestion', '6');
-        navigate('/survey/question/6');
-      } else if (questionId === '5b') {
-        setCurrentQuestion(6);
-        localStorage.setItem('stepZeroCurrentQuestion', '6');
         navigate('/survey/question/6');
       } else if (questionNumber === 6) {
         setCurrentQuestion(7);
-        localStorage.setItem('stepZeroCurrentQuestion', '7');
         navigate('/survey/question/7');
       } else if (questionNumber === 7) {
         setCurrentQuestion(8);
-        localStorage.setItem('stepZeroCurrentQuestion', '8');
         navigate('/survey/question/8');
       } else if (questionNumber === 8) {
-        console.log('Calling completeSurvey for question 8');
         setFinalQuestionSubmitted(true);
         completeSurvey();
-        return; // Add return to prevent further execution
+        return;
       }
     } else {
-      console.log(`Setting error for ${errorKey}`);
       setErrors({ ...errors, [errorKey]: true });
-      
-      // Trigger shake animation to replay
-      if (questionNumber === 1 || questionNumber === 2 || questionNumber === 3 || questionId === '4a' || questionId === '4b' || questionId === '4b-other' || questionId === '5a' || questionId === '5a-other' || questionId === '5c' || questionId === '5b' || questionId === '5b-email' || questionNumber === 6 || questionNumber === 7 || questionNumber === 8) {
-        setShakeTrigger(prev => prev + 1);
-      }
-    }
-  };
-
-  const selectLocation = (location) => {
-    setSelectedLocation(location);
-    setErrors({ ...errors, location: false });
-  };
-
-  const assignChallenge = () => {
-    if (!selectedLocation) {
-      setErrors({ ...errors, location: true });
       setShakeTrigger(prev => prev + 1);
-      return;
-    }
-
-    const challenge = getRandomChallenge(selectedLocation);
-    setAssignedChallenge(challenge);
-    
-    // Save progress to localStorage
-    localStorage.setItem('stepZeroLocation', selectedLocation);
-    localStorage.setItem('stepZeroChallenge', challenge);
-    localStorage.setItem('stepZeroCurrentQuestion', '0');
-    
-    // Fade out location selection
-    setShowLocationSelection(false);
-    
-    // Fade in challenge assignment screen after a brief delay
-    setTimeout(() => {
-      setShowChallengeAssignment(true);
-      setChallengeFadeIn(true);
-      
-      // Auto-fade out after 3.5 seconds so users can read the intro
-      const timer = setTimeout(() => {
-        setChallengeFadeIn(false);
-        setTimeout(() => {
-          setShowChallengeAssignment(false);
-          setShowChallengeText(true);
-        }, 300);
-      }, 3500);
-      
-      setChallengeAssignmentTimer(timer);
-    }, 300);
-  };
-
-
-
-  const backToLocation = () => {
-    setShowChallengeText(false);
-    setShowLocationSelection(true);
-    setSelectedLocation('');
-    setAssignedChallenge('');
-    localStorage.removeItem('stepZeroLocation');
-    localStorage.removeItem('stepZeroChallenge');
-    localStorage.removeItem('stepZeroCurrentQuestion');
-  };
-
-  const continueToSurvey = () => {
-    setShowChallengeText(false);
-    setCurrentQuestion(1);
-    localStorage.setItem('stepZeroCurrentQuestion', '1');
-    navigate('/survey/question/1');
-  };
-
-  const saveProgress = () => {
-    try {
-      localStorage.setItem('stepZeroAnswers', JSON.stringify(answers));
-      localStorage.setItem('stepZeroCurrentQuestion', currentQuestion.toString());
-    } catch (error) {
-      console.error('Error saving progress:', error);
     }
   };
 
@@ -877,19 +575,11 @@ function AppContent() {
       localStorage.setItem('stepZeroAnswers', JSON.stringify(newAnswers));
     }, 100);
 
-    if (questionId === 'question3') {
-      setChallengeCompleted(option);
-    } else if (questionId === 'question4b') {
+    if (questionId === 'question4b') {
       if (option === 'Other') {
         setShowOtherSection(true);
       } else {
         setShowOtherSection(false);
-      }
-    } else if (questionId === 'question5a') {
-      if (option === 'Other') {
-        setShowOtherSection5a(true);
-      } else {
-        setShowOtherSection5a(false);
       }
     } else if (questionId === 'question5b') {
       if (option === 'Yes') {
@@ -909,10 +599,6 @@ function AppContent() {
         setShowMediaSection(false);
       }
     }
-  };
-
-  const declineResponse = () => {
-    setCurrentQuestion(6);
   };
 
   const completeSurvey = async () => {
@@ -982,27 +668,24 @@ function AppContent() {
 
           // Prepare survey data for Supabase
           const surveyData = {
-            challenge_completed: challengeCompleted,
-            selected_location: selectedLocation,
-            assigned_challenge: assignedChallenge,
-            question3_answer: answers.question3 || '',
-            question4a_answer: answers.question4a || '',
-            question4b_answer: answers.question4b || '',
+            question1_challenge: answers.question1 || '',
+            question2_source: answers.question2 || '',
+            question3_completed: answers.question3 || '',
+            question4a_discomfort: answers.question4a || '',
+            question4b_reason: answers.question4b || '',
             question4b_other: answers['answer4b-other'] || '',
-            question5a_answer: answers.question5a || '',
-            question5a_other: answers['answer5a-other'] || '',
-            question5b_answer: answers.question5b || '',
+            question5a_another: answers.question5a || '',
+            question5b_reminder: answers.question5b || '',
             question5b_email: answers['answer5b-email'] || '',
-            question5c_answer: answers.question5c || '',
-            question6_answer: answers.question6 || '',
+            question6_consent: answers.question6 || '',
             question7_age: answers.age || '',
             question8_gender: answers.gender || '',
             terms_consent: termsConsent,
             completion_time: new Date().toISOString(),
             user_agent: navigator.userAgent,
             ip_address: 'client-side', // Will be captured server-side if needed
-            survey_version: '2.0',
-            media_file_url: fileUrl, // Add the file URL to the survey data
+            survey_version: '3.0',
+            media_file_url: fileUrl,
             media_file_name: selectedFile ? selectedFile.name : null
           };
 
@@ -1045,7 +728,7 @@ function AppContent() {
           }
 
           setShowThankYou(true);
-          const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+          const type = answers.question3 === 'Yes' ? 'completed' : 'not-completed';
           setThankYouType(type);
           setLastThankYouType(type);
           setSurveyCompleted(true);
@@ -1059,7 +742,7 @@ function AppContent() {
           console.error('Error in completeSurvey:', error);
           // Continue with survey completion even if save fails
           setShowThankYou(true);
-          const type = challengeCompleted === 'Yes' ? 'completed' : 'not-completed';
+          const type = answers.question3 === 'Yes' ? 'completed' : 'not-completed';
           setThankYouType(type);
           setLastThankYouType(type);
           setSurveyCompleted(true);
@@ -1284,7 +967,7 @@ function AppContent() {
             <>
               <h2>Thank You</h2>
               <p>Congratulations on Taking Step One</p>
-              <p className="subheading">Keep up with our social media for more updates and to find out more about your next steps</p>
+              <p className="subheading">Be sure to follow our socials to keep up with us and be on the lookout for our next steps!</p>
               <button className="about-btn" onClick={() => { setPreviousPage('completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
               </button>
@@ -1310,8 +993,8 @@ function AppContent() {
           {thankYouType === 'not-completed' && (
             <>
               <h2>Thank You</h2>
-              <p>Thanks for checking us out. Maybe next time.</p>
-              <p className="subheading">Keep up with our socials in case you change your mind and to find out more about your next steps</p>
+              <p>Thanks for checking us out, maybe you'll take step one next time.</p>
+              <p className="subheading">Be sure to follow our socials to keep up with us and be on the lookout for our next steps!</p>
               <button className="about-btn" onClick={() => { setPreviousPage('not-completed'); setShowThankYou(false); setShowAbout(true); navigate('/about'); }} style={{ marginTop: '15px', marginBottom: '7.5px' }}>
                 About Step Zero
               </button>
@@ -1797,159 +1480,71 @@ function AppContent() {
             <div className="progress-fill" style={{ width: `${updateProgress()}%` }}></div>
           </div>
 
-          {!showChallengeAssignment && (
             <button className="survey-exit-btn fade-in" onClick={goBackToMain}>
               ×
             </button>
-          )}
 
           <div className="survey">
-            {showLocationSelection && (
-              <div className="question location-selection fade-in">
-                <h3>Where did you find your card?</h3>
-                <div className="text-input-container">
-                  <select
-                    className={`text-input ${errors.location ? 'shake' : ''}`}
-                    value={selectedLocation}
-                    onChange={(e) => selectLocation(e.target.value)}
-                    key={`location-${shakeTrigger}`}
-                  >
-                    <option value="">Select location</option>
-                    <option value="Beach / Park / Public Spaces">Beach / Park / Public Spaces</option>
-                    <option value="Coffee Shop / Library">Coffee Shop / Library</option>
-                    <option value="Fitness Class (Yoga, Spin, Pilates, HIIT)">Fitness Class (Yoga, Spin, Pilates, HIIT)</option>
-                    <option value="Martial Arts Gym">Martial Arts Gym</option>
-                    <option value="Movies / Mall / Bowling / Arcade / Theme Park">Movies / Mall / Bowling / Arcade / Theme Park</option>
-                    <option value="Office">Office</option>
-                    <option value="Weightlifting Gym">Weightlifting Gym</option>
-                  </select>
-                  {errors.location && <div className="error-message">Please select a location</div>}
-                </div>
-                <div className="button-container">
-                  <button className="back-btn small" onClick={goBackToMain}>
-                    Back
-                  </button>
-                  <button 
-                    className="continue-btn small" 
-                    onClick={assignChallenge}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {showChallengeAssignment && (
+            {showIntro && (
               <div className="question challenge-assignment">
-                <h3>Here is your challenge, come back when you've completed it</h3>
+                <h3>TELL US ABOUT YOUR CHALLENGE</h3>
               </div>
             )}
-
-            {showChallengeText && (
-              <div className="question challenge-text-screen fade-in">
-                <div className="challenge-text">
-                  {assignedChallenge}
-                </div>
-                <div className="button-container">
-                  <button className="back-btn small" onClick={backToLocation}>
-                    Back
-                  </button>
-                  <button className="back-btn small" onClick={showNotInterested}>
-                    Not Interested
-                  </button>
-                  <button className="continue-btn small" onClick={continueToSurvey}>
-                    I've Completed it
-                  </button>
-                </div>
-              </div>
-            )}
-
-
-
 
 
           {currentQuestion === 1 && (
             <div className="question">
-              <h3>Did you complete your challenge?</h3>
-              <div className="options-container">
-                <div className={`options ${errors.question3 ? 'shake' : ''}`} key={`question3-${shakeTrigger}`}>
-                  <div 
-                    className={`option ${answers.question3 === 'Yes' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question3', 'Yes')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">Yes</div>
-                  </div>
-                  <div 
-                    className={`option ${answers.question3 === 'Not Yet' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question3', 'Not Yet')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">Not Yet</div>
-                  </div>
-                </div>
-                {errors.question3 && <div className="error-message">Please choose a response</div>}
+              <h3>What challenge were you given?</h3>
+              <div className="text-input-container">
+                <input
+                  type="text"
+                  className={`text-input ${errors.question1 ? 'shake' : ''}`}
+                  placeholder="Enter your challenge"
+                  value={answers.question1 || ''}
+                  onChange={(e) => handleInputChange('question1', e.target.value)}
+                  key={`question1-${shakeTrigger}`}
+                />
               </div>
               <div className="button-container">
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
+                <button
+                  className="continue-btn small"
                   onClick={() => validateAndContinue(1)}
                 >
                   Next
                 </button>
               </div>
+              {errors.question1 && <div className="error-message">Please enter your challenge</div>}
             </div>
           )}
 
           {currentQuestion === 2 && (
             <div className="question">
-              <h3>Where did you find your card?</h3>
+              <h3>Where did you find your challenge?</h3>
               <div className="text-input-container">
-                <select
-                  className={`text-input ${errors.answer2 ? 'shake' : ''}`}
-                  value={answers.answer2 || ''}
-                  onChange={(e) => handleInputChange('answer2', e.target.value)}
-                  key={`answer2-${shakeTrigger}`}
-                >
-                  <option value="">Select location</option>
-                  <option value="Cafe">Cafe</option>
-                  <option value="Exercise Studio (Yoga, Pilates, Spin, HIIT)">Exercise Studio (Yoga, Pilates, Spin, HIIT)</option>
-                  <option value="Library">Library</option>
-                  <option value="Mall">Mall</option>
-                  <option value="Martial Arts Gym">Martial Arts Gym</option>
-                  <option value="Weightlifting Gym">Weightlifting Gym</option>
-                  <option value="Other">Other</option>
-                </select>
-                
-                {answers.answer2 === 'Other' && (
-                  <input
-                    type="text"
-                    className={`text-input ${errors['answer2-other'] ? 'shake' : ''}`}
-                    placeholder="Please specify other location..."
-                    value={answers['answer2-other'] || ''}
-                    onChange={(e) => handleInputChange('answer2-other', e.target.value)}
-                    key={`answer2-other-${shakeTrigger}`}
-                    style={{ marginTop: '10px' }}
-                  />
-                )}
-                
-                <div className="button-container">
-                  <button className="back-btn small" onClick={goBack}>
-                    Back
-                  </button>
-                  <button 
-                    className="continue-btn small" 
-                    onClick={() => validateAndContinue(2)}
-                  >
-                    Next
-                  </button>
-                </div>
-                {errors.answer2 && <div className="error-message">Please select location</div>}
-                {errors['answer2-other'] && <div className="error-message">Please specify the other location</div>}
+                <input
+                  type="text"
+                  className={`text-input ${errors.question2 ? 'shake' : ''}`}
+                  placeholder="Enter where you found it"
+                  value={answers.question2 || ''}
+                  onChange={(e) => handleInputChange('question2', e.target.value)}
+                  key={`question2-${shakeTrigger}`}
+                />
               </div>
+              <div className="button-container">
+                <button className="back-btn small" onClick={goBack}>
+                  Back
+                </button>
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue(2)}
+                >
+                  Next
+                </button>
+              </div>
+              {errors.question2 && <div className="error-message">Please enter where you found it</div>}
             </div>
           )}
 
@@ -1991,7 +1586,7 @@ function AppContent() {
 
           {currentQuestion === '4a' && (
             <div className="question">
-              <h3>Describe your level of discomfort while completing your challenge</h3>
+              <h3>How would you describe your level of discomfort while completing your challenge</h3>
               <div className="options-container">
                 <div className={`options ${errors.question4a ? 'shake' : ''}`} key={`question4a-${shakeTrigger}`}>
                   <div 
@@ -2036,9 +1631,9 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(4, 'a')}
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('4a')}
                 >
                   Next
                 </button>
@@ -2051,35 +1646,35 @@ function AppContent() {
               <h3>Why not?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question4b ? 'shake' : ''}`} key={`question4b-${shakeTrigger}`}>
-                  <div 
-                    className={`option ${answers.question4b === 'I didn\'t have time' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I didn\'t have time')}
+                  <div
+                    className={`option ${answers.question4b === "I'm too nervous" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I'm too nervous")}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I didn't have time</div>
+                    <div className="option-text">I'm too nervous</div>
                   </div>
-                  <div 
-                    className={`option ${answers.question4b === 'I was too nervous' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I was too nervous')}
+                  <div
+                    className={`option ${answers.question4b === "I don't have time" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I don't have time")}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I was too nervous</div>
+                    <div className="option-text">I don't have time</div>
                   </div>
-                  <div 
-                    className={`option ${answers.question4b === 'I thought it was pointless' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I thought it was pointless')}
+                  <div
+                    className={`option ${answers.question4b === "I don't think it would benefit me" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I don't think it would benefit me")}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I thought it was pointless</div>
+                    <div className="option-text">I don't think it would benefit me</div>
                   </div>
-                  <div 
-                    className={`option ${answers.question4b === 'I\'m not interested' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question4b', 'I\'m not interested')}
+                  <div
+                    className={`option ${answers.question4b === "I'm not interested" ? 'selected' : ''}`}
+                    onClick={() => selectOption('question4b', "I'm not interested")}
                   >
                     <div className="radio-circle"></div>
                     <div className="option-text">I'm not interested</div>
                   </div>
-                  <div 
+                  <div
                     className={`option ${answers.question4b === 'Other' ? 'selected' : ''}`}
                     onClick={() => selectOption('question4b', 'Other')}
                   >
@@ -2093,9 +1688,9 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(4, 'b')}
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('4b')}
                 >
                   Next
                 </button>
@@ -2121,43 +1716,22 @@ function AppContent() {
 
           {currentQuestion === '5a' && (
             <div className="question">
-              <h3>What made you decide to do it?</h3>
+              <h3>Would you complete another Step Zero challenge tomorrow?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question5a ? 'shake' : ''}`} key={`question5a-${shakeTrigger}`}>
-                  <div 
-                    className={`option ${answers.question5a === 'I was just curious' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5a', 'I was just curious')}
+                  <div
+                    className={`option ${answers.question5a === 'Yes' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'Yes')}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">I was just curious</div>
+                    <div className="option-text">Yes</div>
                   </div>
-                  <div 
-                    className={`option ${answers.question5a === 'It was already a part of my routine' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5a', 'It was already a part of my routine')}
+                  <div
+                    className={`option ${answers.question5a === 'No' ? 'selected' : ''}`}
+                    onClick={() => selectOption('question5a', 'No')}
                   >
                     <div className="radio-circle"></div>
-                    <div className="option-text">It was already a part of my routine</div>
-                  </div>
-                  <div 
-                    className={`option ${answers.question5a === 'It required minimal effort' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5a', 'It required minimal effort')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">It required minimal effort</div>
-                  </div>
-                  <div 
-                    className={`option ${answers.question5a === 'I wanted to push myself' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5a', 'I wanted to push myself')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">I wanted to push myself</div>
-                  </div>
-                  <div 
-                    className={`option ${answers.question5a === 'Other' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5a', 'Other')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">Other</div>
+                    <div className="option-text">No</div>
                   </div>
                 </div>
                 {errors.question5a && <div className="error-message">Please choose a response</div>}
@@ -2166,61 +1740,9 @@ function AppContent() {
                 <button className="back-btn small" onClick={goBack}>
                   Back
                 </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(5, 'a')}
-                >
-                  Next
-                </button>
-              </div>
-              
-              {showOtherSection5a && (
-                <div className="other-section">
-                  <div className="text-input-container">
-                    <textarea
-                      className={`text-input ${errors['answer5a-other'] ? 'shake' : ''}`}
-                      placeholder="Other..."
-                      value={answers['answer5a-other'] || ''}
-                      onChange={(e) => handleInputChange('answer5a-other', e.target.value)}
-                      rows="4"
-                      key={`answer5a-other-${shakeTrigger}`}
-                    />
-                    {errors['answer5a-other'] && <div className="error-message">Please provide a response</div>}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {currentQuestion === '5c' && (
-            <div className="question">
-              <h3>Would you do another similar challenge tomorrow?</h3>
-              <div className="options-container">
-                <div className={`options ${errors.question5c ? 'shake' : ''}`} key={`question5c-${shakeTrigger}`}>
-                  <div 
-                    className={`option ${answers.question5c === 'Yes' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5c', 'Yes')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">Yes</div>
-                  </div>
-                  <div 
-                    className={`option ${answers.question5c === 'No' ? 'selected' : ''}`}
-                    onClick={() => selectOption('question5c', 'No')}
-                  >
-                    <div className="radio-circle"></div>
-                    <div className="option-text">No</div>
-                  </div>
-                </div>
-                {errors.question5c && <div className="error-message">Please choose a response</div>}
-              </div>
-              <div className="button-container">
-                <button className="back-btn small" onClick={goBack}>
-                  Back
-                </button>
-                <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(5, 'c')}
+                <button
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('5a')}
                 >
                   Next
                 </button>
@@ -2230,7 +1752,7 @@ function AppContent() {
 
           {currentQuestion === '5b' && (
             <div className="question">
-              <h3>Would you like to be reminded of Step Zero?</h3>
+              <h3>Would you like to be reminded to complete your challenge?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question5b ? 'shake' : ''}`} key={`question5b-${shakeTrigger}`}>
                   <div 
@@ -2255,8 +1777,8 @@ function AppContent() {
                   Back
                 </button>
                 <button 
-                  className="continue-btn small" 
-                  onClick={() => validateAndContinue(5, 'b')}
+                  className="continue-btn small"
+                  onClick={() => validateAndContinue('5b')}
                 >
                   Next
                 </button>
@@ -2333,8 +1855,7 @@ function AppContent() {
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
-                  <option value="Non-binary">Non-binary</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
+                  <option value="Non-Binary">Non-Binary</option>
                 </select>
                 {errors.gender && <div className="error-message">Please provide a response</div>}
               </div>
@@ -2375,10 +1896,10 @@ function AppContent() {
                   Back
                 </button>
                 <button 
-                  className="continue-btn small" 
+                  className="continue-btn small"
                   onClick={() => validateAndContinue(8)}
                 >
-                  Next
+                  Submit
                 </button>
               </div>
             </div>
@@ -2386,7 +1907,7 @@ function AppContent() {
 
           {currentQuestion === 6 && (
             <div className="question">
-              <h3>Do you consent to having your response anonymously shared online?</h3>
+              <h3>Do you consent to having your responses anonymously shared online?</h3>
               <div className="options-container">
                 <div className={`options ${errors.question6 ? 'shake' : ''}`} key={`question6-${shakeTrigger}`}>
                   <div 
