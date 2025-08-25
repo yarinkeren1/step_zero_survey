@@ -138,11 +138,11 @@ body {
 }
 
 .continue-btn.small {
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  padding: 8px 16px;
+  font-size: 0.9rem;
   border-width: 1px;
-  width: 60px;
-  height: 32px;
+  min-width: fit-content;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,11 +180,11 @@ body {
 }
 
 .back-btn.small {
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  padding: 8px 16px;
+  font-size: 0.9rem;
   border-width: 1px;
-  width: 60px;
-  height: 32px;
+  min-width: fit-content;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,18 +274,62 @@ body {
   position: relative;
 }
 
-.challenge-intro {
-  animation: fadeInOut 2.25s ease;
+/* Location Selection */
+.location-selection {
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Challenge Assignment */
+.challenge-assignment {
+  animation: fadeInOut 3.5s ease;
+  animation-fill-mode: forwards;
   font-size: 3.125rem;
   font-weight: bold;
   letter-spacing: 2px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
 }
 
-.question.challenge-intro h3 {
-  text-transform: uppercase !important;
-  text-align: center !important;
-  width: 100%;
+/* Challenge Text Screen */
+.challenge-text-screen {
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.challenge-text {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  font-weight: 400;
+  margin: 40px 0;
+  max-width: 800px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.challenge-instructions {
+  margin: 30px 0;
+  padding: 15px 25px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.challenge-instructions p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 .submitted-overlay {
@@ -1037,6 +1081,17 @@ select.text-input option {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 }
 
