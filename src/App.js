@@ -268,6 +268,35 @@ function AppContent() {
     }
   }, [navigate]);
 
+  const CookieBanner = () => (
+    <div className="cookie-banner-popup">
+      <div className="cookie-popup-content">
+        <h4>We Use Cookies</h4>
+        <p>
+          We use cookies to enhance your experience and analyze site usage.
+          By continuing to use our site, you consent to our use of cookies.
+        </p>
+        <div className="cookie-popup-buttons">
+          <button className="cookie-popup-btn accept" onClick={acceptCookies}>
+            Accept All
+          </button>
+          <button className="cookie-popup-btn necessary" onClick={acceptNecessaryCookies}>
+            Necessary Only
+          </button>
+          <button className="cookie-popup-btn decline" onClick={declineCookies}>
+            Decline All
+          </button>
+        </div>
+        <button
+          className="cookie-popup-link"
+          onClick={() => { setShowPrivacy(true); setActiveTab('cookies'); navigate('/privacy'); }}
+        >
+          Learn more
+        </button>
+      </div>
+    </div>
+  );
+
   // Cleanup submitted timer on unmount
   useEffect(() => {
     return () => {
@@ -1200,10 +1229,11 @@ function AppContent() {
 
   if (showThankYou) {
     return (
-      <div className="container">
-        <div className="nav-bar">
-          <div className="nav-links">
-            <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+      <>
+        <div className="container">
+          <div className="nav-bar">
+            <div className="nav-links">
+              <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
             <button
               ref={aboutBtnRef}
               className="nav-btn"
@@ -1322,13 +1352,17 @@ function AppContent() {
           </div>
         </div>
       </div>
-    );
+    </div>
+    {showCookieBanner && <CookieBanner />}
+  </>
+  );
   }
 
   if (showPrivacy) {
     return (
-      <div className="container">
-        <div className="nav-bar">
+      <>
+        <div className="container">
+          <div className="nav-bar">
           <div className="nav-links">
             <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
             <button
@@ -1589,24 +1623,27 @@ function AppContent() {
             <span>© Step Zero, Inc 2025</span>
           </div>
         </div>
-      </div>
+        </div>
+        {showCookieBanner && <CookieBanner />}
+      </>
     );
   }
 
   if (showAbout) {
     return (
-      <div className="container">
-        <div className="nav-bar">
-          <div className="nav-links">
-            <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
-            <button ref={aboutBtnRef} className="nav-btn">About</button>
-            <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
-            <div className="nav-indicator" style={indicatorStyle}></div>
+      <>
+        <div className="container">
+          <div className="nav-bar">
+            <div className="nav-links">
+              <button ref={homeBtnRef} className="nav-btn" onClick={goBackToMain}>Home</button>
+              <button ref={aboutBtnRef} className="nav-btn">About</button>
+              <button className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>Foundations</button>
+              <div className="nav-indicator" style={indicatorStyle}></div>
+            </div>
           </div>
-        </div>
-        <div className="about-page">
-                        <h2>About Us</h2>
-          <div className="about-content">
+          <div className="about-page">
+            <h2>About Us</h2>
+            <div className="about-content">
             <p>
               Step Zero is a movement created to push people to become the best version of themselves 
               by confronting them with challenges that they may naturally avoid, delay or not think about altogether. We believe 
@@ -1688,6 +1725,8 @@ function AppContent() {
           </div>
         </div>
       </div>
+      {showCookieBanner && <CookieBanner />}
+      </>
     );
   }
 
@@ -1746,35 +1785,7 @@ function AppContent() {
             </div>
           </div>
           
-          {/* Cookie Banner Popup */}
-          {showCookieBanner && (
-            <div className="cookie-banner-popup">
-              <div className="cookie-popup-content">
-                <h4>We Use Cookies</h4>
-                <p>
-                  We use cookies to enhance your experience and analyze site usage. 
-                  By continuing to use our site, you consent to our use of cookies.
-                </p>
-                <div className="cookie-popup-buttons">
-                  <button className="cookie-popup-btn accept" onClick={acceptCookies}>
-                    Accept All
-                  </button>
-                  <button className="cookie-popup-btn necessary" onClick={acceptNecessaryCookies}>
-                    Necessary Only
-                  </button>
-                  <button className="cookie-popup-btn decline" onClick={declineCookies}>
-                    Decline All
-                  </button>
-                </div>
-                <button 
-                  className="cookie-popup-link"
-                  onClick={() => { setShowCookieBanner(false); setShowPrivacy(true); setActiveTab('cookies'); navigate('/privacy'); }}
-                >
-                  Learn more
-                </button>
-              </div>
-            </div>
-          )}
+          {showCookieBanner && <CookieBanner />}
         </>
       )}
 
