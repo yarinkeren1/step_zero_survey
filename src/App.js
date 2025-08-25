@@ -1351,6 +1351,7 @@ function AppContent() {
     </>
   );
 }
+main
 
   if (showPrivacy) {
     return (
@@ -2382,14 +2383,21 @@ function AppContent() {
                       onChange={handleFileUpload}
                       style={{ display: 'none' }}
                     />
-                    <button className="upload-btn" onClick={() => document.getElementById('media-upload').click()}>
+                    <button
+                      className="upload-btn"
+                      onClick={() => document.getElementById('media-upload').click()}
+                    >
                       Choose File
                     </button>
                     {selectedFile && (
                       <div className="file-info">
                         <span className="file-name">{selectedFile.name}</span>
-                        <button className="remove-file" onClick={removeFile}>Remove</button>
-                        {showCheckmark && <span className="upload-checkmark">✓</span>}
+                        <button className="remove-file" onClick={removeFile}>
+                          Remove
+                        </button>
+                        {showCheckmark && (
+                          <span className="upload-checkmark">✓</span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2397,6 +2405,7 @@ function AppContent() {
               )}
             </div>
           </div>
+main
           <div className="bottom-footer">
             <div className="copyright-footer">
               <span>© Step Zero, Inc 2025</span>
