@@ -463,6 +463,9 @@ function AppContent() {
   };
 
   const validateAndContinue = (questionNumber) => {
+    console.log('validateAndContinue called with questionNumber:', questionNumber);
+    console.log('Current answers state:', JSON.stringify(answers, null, 2));
+    
     if (questionNumber === 8 && finalQuestionSubmitted) {
       return;
     }
@@ -557,6 +560,10 @@ function AppContent() {
         setCurrentQuestion(7);
         navigate('/survey/question/7');
       } else if (questionNumber === 7) {
+        console.log('Navigating from question 7 to 8');
+        console.log('Answers before navigation:', JSON.stringify(answers, null, 2));
+        // Save answers to localStorage before navigation to prevent loss
+        localStorage.setItem('stepZeroAnswers', JSON.stringify(answers));
         setCurrentQuestion(8);
         navigate('/survey/question/8');
       } else if (questionNumber === 8) {
@@ -571,14 +578,19 @@ function AppContent() {
   };
 
   const selectOption = (questionId, option) => {
-    const newAnswers = { ...answers, [questionId]: option };
-    setAnswers(newAnswers);
+    setAnswers(prevAnswers => {
+      const newAnswers = { ...prevAnswers, [questionId]: option };
+      console.log('selectOption - Previous answers:', JSON.stringify(prevAnswers, null, 2));
+      console.log('selectOption - New answers:', JSON.stringify(newAnswers, null, 2));
+      
+      // Save progress after each answer
+      setTimeout(() => {
+        localStorage.setItem('stepZeroAnswers', JSON.stringify(newAnswers));
+      }, 100);
+      
+      return newAnswers;
+    });
     setErrors({ ...errors, [questionId]: false });
-
-    // Save progress after each answer
-    setTimeout(() => {
-      localStorage.setItem('stepZeroAnswers', JSON.stringify(newAnswers));
-    }, 100);
 
     if (questionId === 'question4b') {
       if (option === 'Other') {
@@ -714,6 +726,8 @@ function AppContent() {
           
           if (supabase) {
             console.log('Supabase client is available');
+            console.log('Attempting to insert data:', JSON.stringify(surveyData, null, 2));
+            
             const { data, error } = await supabase
               .from('survey_responses')
               .insert([surveyData]);
@@ -721,6 +735,9 @@ function AppContent() {
             if (error) {
               console.error('Error saving survey response:', error);
               console.error('Error details:', error.message);
+              console.error('Error code:', error.code);
+              console.error('Error hint:', error.hint);
+              console.error('Error details:', error.details);
               // Continue with survey completion even if save fails
             } else {
               console.log('Survey response saved successfully:', data);
@@ -996,6 +1013,18 @@ function AppContent() {
   const handleInputChange = (questionId, value) => {
     console.log('handleInputChange called with:', { questionId, value });
     console.log('Previous answers state:', JSON.stringify(answers, null, 2));
+    
+    // Restore answers from localStorage if we're on question 8 and answers seem incomplete
+    if (currentQuestion === 8 && Object.keys(answers).length < 7) {
+      const savedAnswers = localStorage.getItem('stepZeroAnswers');
+      if (savedAnswers) {
+        const restoredAnswers = JSON.parse(savedAnswers);
+        console.log('Restoring answers from localStorage:', JSON.stringify(restoredAnswers, null, 2));
+        setAnswers(prevAnswers => ({ ...restoredAnswers, [questionId]: value }));
+        return;
+      }
+    }
+    
     setAnswers(prevAnswers => {
       const newAnswers = { ...prevAnswers, [questionId]: value };
       console.log('New answers state:', JSON.stringify(newAnswers, null, 2));
